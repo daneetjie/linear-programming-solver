@@ -1,15 +1,26 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace LinearProgrammingSolver.Models
 {
     public class FileModel
     {
-        public string ReadFile(string filePath)
+        public string[] ReadFile(string filePath)
         {
-            if (!File.Exists(filePath))
+            try
             {
-                return "Error: File could not be found.";
-            }
+                if (!File.Exists(filePath))
+                {
+                    throw new FileNotFoundException($"File not found: {filePath}");
+                }
 
-            return File.ReadAllText(filePath);
+                return File.ReadAllLines(filePath);
+            }
+            catch (Exception ex)
+            {
+                throw new IOException($"Error reading file '{filePath}': {ex.Message}", ex);
+            }
         }
     }
 }
