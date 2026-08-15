@@ -53,7 +53,6 @@ namespace LinearProgrammingSolver.Controllers
             programs.Add(program);
             return programs;
         }
-
         private static (double[] coefficients, string op, double rhs) ParseConstraint(string line, int numVariables)
         {
             var tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
