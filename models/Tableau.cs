@@ -34,7 +34,7 @@ namespace LinearProgrammingSolver.Models
 
             for (int j = 0; j < NumVariables; j++)
             {
-                Matrix[0, j] = program.ObjectiveCoefficients[j];
+                Matrix[0, j] = -program.ObjectiveCoefficients[j];
             }
 
             for (int i = 0; i < NumConstraints; i++)
