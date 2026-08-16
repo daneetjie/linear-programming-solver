@@ -32,6 +32,10 @@ namespace LinearProgrammingSolver.Controllers
                 foreach (var program in programs)
                 {
                     DisplayProgram(program);
+
+                    var tableau = new Tableau(program);
+                    consoleView.DisplayMessage("Initial Tableau:");
+                    consoleView.DisplayMessage(tableau.ToString());
                 }
             }
             catch (Exception ex)
