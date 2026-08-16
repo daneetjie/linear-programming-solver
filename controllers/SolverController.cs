@@ -1,5 +1,6 @@
 using LinearProgrammingSolver.Models;
 using LinearProgrammingSolver.Views;
+using System.Linq;
 
 namespace LinearProgrammingSolver.Controllers
 {
@@ -27,7 +28,8 @@ namespace LinearProgrammingSolver.Controllers
                 var programs = LinearProgramParser.Parse(fileContents);
 
                 // Display results
-                consoleView.DisplayMessage($"Successfully parsed {programs.Count} constraint(s)\n");
+                int totalConstraints = programs.Sum(p => p.Constraints.Count);
+                consoleView.DisplayMessage($"Successfully parsed {totalConstraints} constraint(s)\n");
 
                 foreach (var program in programs)
                 {
