@@ -63,14 +63,15 @@ namespace LinearProgrammingSolver.Models
             {
                 var expandedRow = expandedRows[i];
                 int row = i + 1;
+                double sign = expandedRow.IsSlack ? 1 : -1;
 
                 for (int j = 0; j < NumVariables; j++)
                 {
-                    Matrix[row, j] = expandedRow.Coefficients[j];
+                    Matrix[row, j] = sign * expandedRow.Coefficients[j];
                 }
 
-                Matrix[row, NumVariables + i] = expandedRow.IsSlack ? 1 : -1;
-                Matrix[row, numColumns - 1] = expandedRow.RightHandSide;
+                Matrix[row, NumVariables + i] = 1;
+                Matrix[row, numColumns - 1] = sign * expandedRow.RightHandSide;
             }
 
             ColumnHeaders = BuildColumnHeaders(expandedRows);
