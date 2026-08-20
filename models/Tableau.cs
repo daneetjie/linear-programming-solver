@@ -25,6 +25,10 @@ namespace LinearProgrammingSolver.Models
 
         public List<string> ColumnHeaders { get; }
 
+        private readonly List<double[,]> history = new();
+
+        public IReadOnlyList<double[,]> IterationHistory => history;
+
         private readonly struct ExpandedRow
         {
             public readonly double[] Coefficients;
@@ -75,6 +79,17 @@ namespace LinearProgrammingSolver.Models
             }
 
             ColumnHeaders = BuildColumnHeaders(expandedRows);
+
+            history.Add(CloneMatrix());
+        }
+
+        public void RecordIteration() => history.Add(CloneMatrix());
+
+        private double[,] CloneMatrix()
+        {
+            var clone = new double[Matrix.GetLength(0), Matrix.GetLength(1)];
+            Array.Copy(Matrix, clone, Matrix.Length);
+            return clone;
         }
 
         private static List<ExpandedRow> ExpandConstraints(List<Constraint> constraints)
@@ -120,21 +135,23 @@ namespace LinearProgrammingSolver.Models
             return headers;
         }
 
-        public override string ToString()
+        public override string ToString() => Format(ColumnHeaders, Matrix);
+
+        public static string Format(List<string> headers, double[,] matrix)
         {
-            int numColumns = ColumnHeaders.Count;
+            int numColumns = headers.Count;
             var columnWidths = new int[numColumns];
 
             for (int j = 0; j < numColumns; j++)
             {
-                columnWidths[j] = ColumnHeaders[j].Length;
+                columnWidths[j] = headers[j].Length;
             }
 
-            for (int i = 0; i < Matrix.GetLength(0); i++)
+            for (int i = 0; i < matrix.GetLength(0); i++)
             {
                 for (int j = 0; j < numColumns; j++)
                 {
-                    int width = Matrix[i, j].ToString().Length;
+                    int width = matrix[i, j].ToString().Length;
                     if (width > columnWidths[j])
                         columnWidths[j] = width;
                 }
@@ -143,13 +160,13 @@ namespace LinearProgrammingSolver.Models
             var sb = new StringBuilder();
 
             for (int j = 0; j < numColumns; j++)
-                sb.Append(ColumnHeaders[j].PadLeft(columnWidths[j] + 2));
+                sb.Append(headers[j].PadLeft(columnWidths[j] + 2));
             sb.AppendLine();
 
-            for (int i = 0; i < Matrix.GetLength(0); i++)
+            for (int i = 0; i < matrix.GetLength(0); i++)
             {
                 for (int j = 0; j < numColumns; j++)
-                    sb.Append(Matrix[i, j].ToString().PadLeft(columnWidths[j] + 2));
+                    sb.Append(matrix[i, j].ToString().PadLeft(columnWidths[j] + 2));
                 sb.AppendLine();
             }
 
