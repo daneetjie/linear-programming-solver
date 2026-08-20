@@ -1,4 +1,5 @@
 using LinearProgrammingSolver.Models;
+using LinearProgrammingSolver.Solvers;
 using LinearProgrammingSolver.Views;
 using System.Linq;
 
@@ -17,7 +18,7 @@ namespace LinearProgrammingSolver.Controllers
 
         public void Start()
         {
-            string filePath = "Data/input.txt";
+            string filePath = "data/input.txt";
 
             try
             {
@@ -38,6 +39,8 @@ namespace LinearProgrammingSolver.Controllers
                     var tableau = new Tableau(program);
                     consoleView.DisplayMessage("Initial Tableau:");
                     consoleView.DisplayMessage(tableau.ToString());
+
+                    SimplexSolver.simpleSolver(tableau);
                 }
             }
             catch (Exception ex)
