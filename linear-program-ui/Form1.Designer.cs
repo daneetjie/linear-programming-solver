@@ -322,7 +322,7 @@
             // 
             // panelSensitivityIterations
             // 
-            panelSensitivityIterations.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelSensitivityIterations.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
             panelSensitivityIterations.BackColor = SystemColors.ActiveCaption;
             panelSensitivityIterations.FlowDirection = FlowDirection.TopDown;
             panelSensitivityIterations.Location = new Point(758, 7);
@@ -340,12 +340,13 @@
             btnSaveAnalysis.TabIndex = 24;
             btnSaveAnalysis.Text = "Save Output To Text File";
             btnSaveAnalysis.UseVisualStyleBackColor = false;
+            btnSaveAnalysis.Click += btnSaveAnalysis_Click;
             // 
             // lblOptimalTableau
             // 
             lblOptimalTableau.Anchor = AnchorStyles.Bottom;
             lblOptimalTableau.AutoSize = true;
-            lblOptimalTableau.Location = new Point(502, 390);
+            lblOptimalTableau.Location = new Point(509, 398);
             lblOptimalTableau.Name = "lblOptimalTableau";
             lblOptimalTableau.Size = new Size(98, 15);
             lblOptimalTableau.TabIndex = 23;
@@ -356,10 +357,10 @@
             dgvSensitivityTableau.Anchor = AnchorStyles.Bottom;
             dgvSensitivityTableau.BackgroundColor = SystemColors.ActiveCaption;
             dgvSensitivityTableau.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSensitivityTableau.Location = new Point(355, 408);
+            dgvSensitivityTableau.Location = new Point(355, 432);
             dgvSensitivityTableau.Name = "dgvSensitivityTableau";
             dgvSensitivityTableau.ReadOnly = true;
-            dgvSensitivityTableau.Size = new Size(397, 393);
+            dgvSensitivityTableau.Size = new Size(397, 369);
             dgvSensitivityTableau.TabIndex = 22;
             // 
             // btnRunSensitivity

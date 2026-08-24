@@ -18,7 +18,7 @@ namespace linear_program_ui
         {
             InitializeComponent();
             primalTab = new PrimalSimplexTab(canonicalDgvPrimal, iterationsPanelPrimal, dgvOptimal);
-            sensitivityTab = new SensitivityTab(cmboSensitivity, cmbTarget, txtNewData, numNewValue,dgvResults, dgvSensitivityTableau, panelSensitivityIterations);
+            sensitivityTab = new SensitivityTab(cmboSensitivity, cmbTarget, txtNewData, numNewValue, dgvResults, dgvSensitivityTableau, panelSensitivityIterations);
             tp_sensitivity.Parent = null;
         }
 
@@ -119,6 +119,11 @@ namespace linear_program_ui
         private void btnSave_Click(object sender, EventArgs e)
         {
             primalTab.SaveAllOutput();
+        }
+
+        private void btnSaveAnalysis_Click(object sender, EventArgs e)
+        {
+            sensitivityTab.SaveSensitivityIterationsToFile();
         }
     }
 }

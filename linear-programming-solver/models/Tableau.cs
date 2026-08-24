@@ -21,7 +21,7 @@ namespace LinearProgrammingSolver.Models
         public string Objective { get; } // max or min
 
         public string[] VariableTypes { get; } // carried over as metadata
-        //TODO: add functionallity to use output in lp
+     
 
         public List<string> ColumnHeaders { get; }
 

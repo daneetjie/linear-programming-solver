@@ -31,6 +31,12 @@ namespace linear_program_ui
             this.dgvResults = dgvResults;
             this.dgvOptimalTableau = dgvOptimalTableau;
             this.sensitivityIterationsPanel = sensitivityIterationsPanel;
+
+            sensitivityIterationsPanel.FlowDirection = FlowDirection.TopDown;
+            sensitivityIterationsPanel.WrapContents = false;
+            sensitivityIterationsPanel.AutoScroll = true;
+            sensitivityIterationsPanel.Padding = new Padding(5);
+            sensitivityIterationsPanel.Resize += (_, _) => ResizeIterationGrids();
         }
 
 
@@ -41,7 +47,7 @@ namespace linear_program_ui
 
             sensitivityIterationsPanel.Controls.Clear();
 
-            for(int i = 0; i < newTableau.IterationHistory.Count; i++)
+            for (int i = 0; i < newTableau.IterationHistory.Count; i++)
             {
                 var label = new Label
                 {
@@ -57,10 +63,10 @@ namespace linear_program_ui
                     AllowUserToAddRows = false,
                     AllowUserToDeleteRows = false,
                     RowHeadersVisible = false,
-                    ScrollBars = ScrollBars.None,
+                    ScrollBars = ScrollBars.Both,
                     AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells,
                     Margin = new Padding(5),
-                    Height = 200
+                    Height = 220
                 };
 
                 TableDisplay.PopulateTableau(dgv, newTableau, newTableau.IterationHistory[i]);
@@ -68,6 +74,47 @@ namespace linear_program_ui
                 sensitivityIterationsPanel.Controls.Add(dgv);
             }
 
+            ResizeIterationGrids();
+            sensitivityIterationsPanel.PerformLayout();
+        }
+
+        public void SaveSensitivityIterationsToFile()
+        {
+            if(lastSensitivityTableau == null)
+            {
+                MessageBox.Show("No sensitivity iterations to save. Run a change first");
+                return;
+            }
+
+            using var dialog = new SaveFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*",
+                FileName = "SensitivityAnalysisOutput.txt",
+                DefaultExt = "txt"
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            string operation = cmboSensitivity.Text;
+            var target = cmbTarget.Text ;
+            double value = double.Parse(numNewValue.Value.ToString());
+
+            File.WriteAllText(dialog.FileName,$"{operation},{target},{value}, \n {TableDisplay.FormatAllIterations(lastSensitivityTableau)},---SENSITIVITY ANALYSIS ITERATIONS---");
+            MessageBox.Show($"Saved to: \n {dialog.FileName}");
+        }
+
+        private void ResizeIterationGrids()
+        {
+            int width = Math.Max(100, sensitivityIterationsPanel.ClientSize.Width
+                - sensitivityIterationsPanel.Padding.Horizontal
+                - SystemInformation.VerticalScrollBarWidth - 10);
+
+            foreach (Control control in sensitivityIterationsPanel.Controls)
+            {
+                if (control is DataGridView dgv)
+                    dgv.Width = width;
+            }
         }
 
         public void SetSolvedTableau(Tableau tableau, SimplexResult lastResult, LinearProgram program)
@@ -193,26 +240,7 @@ namespace linear_program_ui
             ShowRange("Constraint", constraintLabel, lower, upper);
         }
 
-        private void ApplyRhsValueChange(string constraintLabel, double newValue)
-        {
-            int rowIndex = int.Parse(constraintLabel.Replace("C", "")) - 1;
-            var result = SensitivityAnalysis.ApplyRhsChange(program, rowIndex, newValue);
-            ShowSolutionInGrid(result);
-        }
-
-        private void ApplyNonBasicChange(string variableName, double newValue)
-        {
-            int colIndex = tableau.ColumnHeaders.IndexOf(variableName);
-            var result = SensitivityAnalysis.ApplyObjectiveCoeffChange(program, colIndex, newValue);
-            ShowSolutionInGrid(result);
-        }
-
-        private void ApplyBasicChange(string variableName, double newValue)
-        {
-            int colIndex = tableau.ColumnHeaders.IndexOf(variableName);
-            var result = SensitivityAnalysis.ApplyObjectiveCoeffChange(program, colIndex, newValue);
-            ShowSolutionInGrid(result);
-        }
+       
 
         private void DisplayShadowPrices()
         {
@@ -284,15 +312,7 @@ namespace linear_program_ui
             ShowRange("Entry", target, lower, upper);
         }
 
-        private void ApplyNonBasicColumnChange(string target, double newValue)
-        {
-            if (!TryParseColumnTarget(target, out string variableName, out int constraintRow))
-                return;
-
-            int colIndex = tableau.ColumnHeaders.IndexOf(variableName);
-            var result = SensitivityAnalysis.ApplyNonBasicColumnChange(program, colIndex, constraintRow, newValue);
-            ShowSolutionInGrid(result);
-        }
+    
 
         private void ShowSolutionInGrid(SimplexResult result)
         {
