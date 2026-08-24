@@ -6,7 +6,7 @@ namespace LinearProgrammingSolver.Solvers
     {
         private const int MaxIterations = 1000;
 
-        public static void simpleSimplexSolver(Tableau tableau)
+        public static SimplexResult simpleSimplexSolver(Tableau tableau)
         {
             int numRows = tableau.Matrix.GetLength(0);
             int numCols = tableau.Matrix.GetLength(1);
@@ -22,17 +22,15 @@ namespace LinearProgrammingSolver.Solvers
                 int pivotColumn = SelectPivotColumn(tableau.Matrix, rhsColumn);
                 if (pivotColumn == -1)
                 {
-                    PrintIterations(tableau);
-                    PrintSolution(tableau, basis, rhsColumn);
-                    return;
+                    return BuildResult(tableau, basis, rhsColumn);
                 }
 
                 int pivotRow = SelectPivotRow(tableau.Matrix, numRows, pivotColumn, rhsColumn);
                 if (pivotRow == -1)
                 {
-                    PrintIterations(tableau);
-                    Console.WriteLine("LP is unbounded.");
-                    return;
+
+                    throw new InvalidOperationException("LP is unbounded.");
+
                 }
 
                 Pivot(tableau.Matrix, numRows, numCols, pivotRow, pivotColumn);
@@ -40,19 +38,45 @@ namespace LinearProgrammingSolver.Solvers
                 tableau.RecordIteration();
             }
 
-            PrintIterations(tableau);
-            Console.WriteLine($"Simplex did not converge after {MaxIterations} iterations.");
+            throw new InvalidOperationException($"Simplex did not converge after {MaxIterations} iterations.");
         }
 
-        public static void simpleDualSimplexSolver(Tableau tableau)
+        private static SimplexResult BuildResult(Tableau tableau, int[] basis, int rhsColumn)
         {
-            // TODO: implement dual simplex
+            var values = new double[tableau.NumVariables];
+            for (int i = 0; i < basis.Length; i++)
+                if (basis[i] < tableau.NumVariables)
+                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
+            var solution = new Dictionary<string, double>();
+            for (int j = 0; j < tableau.NumVariables; j++)
+                solution[tableau.ColumnHeaders[j]] = Math.Round(values[j], 3);
+            solution["Z"] = Math.Round(tableau.Matrix[0, rhsColumn], 3);
+            return new SimplexResult { Solution = solution, Basis = basis };
+
         }
+
+        private static Dictionary<string, double> BuildSolution(Tableau tableau, int[] basis, int rhsColumn)
+        {
+            var values = new double[tableau.NumVariables];
+            for (int i = 0; i < basis.Length; i++)
+                if (basis[i] < tableau.NumVariables)
+                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
+
+            var result = new Dictionary<string, double>();
+            for (int j = 0; j < tableau.NumVariables; j++)
+                result[tableau.ColumnHeaders[j]] = Math.Round(values[j], 3);
+            result["Z"] = Math.Round(tableau.Matrix[0, rhsColumn], 3);
+
+            return result;
+
+        }
+
+
 
         public static void simpleSolver(Tableau tableau)
         {
-            if (HasNegativeRhs(tableau))
-                Console.WriteLine("dual simplex");
+            if (HasNegativeRhs(tableau)) ;
+
             else
                 simpleSimplexSolver(tableau);
         }
@@ -117,33 +141,9 @@ namespace LinearProgrammingSolver.Solvers
             }
         }
 
-        private static void PrintIterations(Tableau tableau)
-        {
-            var history = tableau.IterationHistory;
-            for (int i = 0; i < history.Count; i++)
-            {
-                string label = i == 0 ? "Initial Tableau" : $"Iteration {i}";
-                Console.WriteLine($"{label}:");
-                Console.WriteLine(Tableau.Format(tableau.ColumnHeaders, history[i]));
-            }
-        }
 
-        private static void PrintSolution(Tableau tableau, int[] basis, int rhsColumn)
-        {
-            var values = new double[tableau.NumVariables];
 
-            for (int i = 0; i < basis.Length; i++)
-            {
-                if (basis[i] < tableau.NumVariables)
-                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
-            }
 
-            Console.WriteLine("Optimal solution found:");
-            for (int j = 0; j < tableau.NumVariables; j++)
-                Console.WriteLine($"  x{j + 1} = {values[j]}");
-
-            Console.WriteLine($"  Z = {tableau.Matrix[0, rhsColumn]}");
-        }
 
         private static bool HasNegativeRhs(Tableau tableau)
         {

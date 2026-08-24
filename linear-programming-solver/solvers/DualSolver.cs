@@ -44,7 +44,7 @@ namespace LinearProgrammingSolver.Solvers
             }
 
             PrintIterations(tableau);
-            Console.WriteLine($"Dual simplex did not converge after {MaxIterations} iterations.");
+            //Console.WriteLine($"Dual simplex did not converge after {MaxIterations} iterations.");
         }
 
         private static int SelectPivotRowDual(double[,] matrix, int rhsColumn)
@@ -116,8 +116,8 @@ namespace LinearProgrammingSolver.Solvers
             for (int i = 0; i < history.Count; i++)
             {
                 string label = i == 0 ? "Initial Tableau" : $"Iteration {i}";
-                Console.WriteLine($"{label}:");
-                Console.WriteLine(Tableau.Format(tableau.ColumnHeaders, history[i]));
+                //Console.WriteLine($"{label}:");
+                //Console.WriteLine(Tableau.Format(tableau.ColumnHeaders, history[i]));
             }
         }
 
@@ -131,11 +131,11 @@ namespace LinearProgrammingSolver.Solvers
                     values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
             }
 
-            Console.WriteLine("Optimal solution found (primal feasible):");
-            for (int j = 0; j < tableau.NumVariables; j++)
-                Console.WriteLine($"  x{j + 1} = {values[j]}");
+            //Console.WriteLine("Optimal solution found (primal feasible):");
+            //for (int j = 0; j < tableau.NumVariables; j++)
+            //    Console.WriteLine($"  x{j + 1} = {values[j]}");
 
-            Console.WriteLine($"  Z = {tableau.Matrix[0, rhsColumn]}");
+            //Console.WriteLine($"  Z = {tableau.Matrix[0, rhsColumn]}");
         }
     }
 }

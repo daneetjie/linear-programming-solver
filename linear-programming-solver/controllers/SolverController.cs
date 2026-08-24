@@ -37,8 +37,8 @@ namespace LinearProgrammingSolver.Controllers
                     DisplayProgram(program);
 
                     var tableau = new Tableau(program);
-                    consoleView.DisplayMessage("Initial Tableau:");
-                    consoleView.DisplayMessage(tableau.ToString());
+                    //consoleView.DisplayMessage("Initial Tableau:");
+                    //consoleView.DisplayMessage(tableau.ToString());
 
                     SimplexSolver.simpleSolver(tableau);
                 }
