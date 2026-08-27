@@ -8,7 +8,9 @@ namespace LinearProgrammingSolver.Solvers
     {
         private const int MaxIterations = 1000;
 
-        public static void simpleDualSimplexSolver(Tableau tableau)
+        // Returns Optimal once every RHS is non-negative, or Infeasible when a negative row has no
+        // eligible entering column - that row can never be satisfied.
+        public static LpStatus simpleDualSimplexSolver(Tableau tableau)
         {
             int numRows = tableau.Matrix.GetLength(0);
             int numCols = tableau.Matrix.GetLength(1);
@@ -24,14 +26,13 @@ namespace LinearProgrammingSolver.Solvers
                 int pivotRow = SelectPivotRowDual(tableau.Matrix, rhsColumn);
                 if (pivotRow == -1)
                 {
-                    
-                    return;
+                    return LpStatus.Optimal;
                 }
 
                 int pivotColumn = SelectPivotColumnDual(tableau.Matrix, rhsColumn, pivotRow);
                 if (pivotColumn == -1)
                 {
-                    return;
+                    return LpStatus.Infeasible;
                 }
 
                 Pivot(tableau.Matrix, numRows, numCols, pivotRow, pivotColumn);
@@ -39,6 +40,7 @@ namespace LinearProgrammingSolver.Solvers
                 tableau.RecordIteration();
             }
 
+            throw new InvalidOperationException($"Dual simplex did not converge after {MaxIterations} iterations.");
         }
 
         private static int SelectPivotRowDual(double[,] matrix, int rhsColumn)

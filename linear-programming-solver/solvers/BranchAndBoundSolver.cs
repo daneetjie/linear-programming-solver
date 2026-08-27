@@ -68,9 +68,7 @@ namespace LinearProgrammingSolver.Solvers
 
 
                 var tableau = new Tableau(node.Program);
-                Solve(tableau);
-
-                var result = SolutionReader.ExtractSolution(tableau);
+                var solveStatus = Solve(tableau);
 
                 var nodeResult = new BranchAndBoundNodeResult
                 {
@@ -78,6 +76,15 @@ namespace LinearProgrammingSolver.Solvers
                     Depth = node.Depth,
                     Tableau = tableau
                 };
+
+                if (solveStatus == LpStatus.Infeasible)
+                {
+                    nodeResult.Status = "fathomed - relaxation is infeasible.";
+                    runResult.Nodes.Add(nodeResult);
+                    continue;
+                }
+
+                var result = SolutionReader.ExtractSolution(tableau);
 
                 if (result.Status == LpStatus.Unbounded)
                 {
@@ -138,12 +145,30 @@ namespace LinearProgrammingSolver.Solvers
         }
 
 
-        private static void Solve(Tableau tableau)
+        // A branch bound such as x >= 1 leaves a negative RHS, so dual simplex runs first to restore
+        // feasibility - but it stops there, with row 0 possibly still negative. Primal simplex has to
+        // finish the job, or the node reports an understated bound and its branch is wrongly fathomed.
+        private static LpStatus Solve(Tableau tableau)
         {
             if (HasNegativeRhs(tableau))
-                DualSolver.simpleDualSimplexSolver(tableau);
-            else
+            {
+                if (DualSolver.simpleDualSimplexSolver(tableau) == LpStatus.Infeasible)
+                    return LpStatus.Infeasible;
+
+                if (HasNegativeRhs(tableau))
+                    return LpStatus.Infeasible;
+            }
+
+            try
+            {
                 SimplexSolver.simpleSimplexSolver(tableau);
+            }
+            catch (InvalidOperationException)
+            {
+                // Unbounded or non-converging node - SolutionReader detects and fathoms it.
+            }
+
+            return LpStatus.Optimal;
         }
 
         private static bool HasNegativeRhs(Tableau tableau)

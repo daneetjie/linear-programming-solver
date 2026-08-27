@@ -11,6 +11,10 @@ namespace linear_program_ui.TabControllers
         public Tableau LastTableau { get; private set; }
         public SimplexResult LastResult { get; private set; }
 
+        // What the tab shows and saves: the relaxation for a continuous model,
+        // the branched integer solution for a 'bin'/'int' one.
+        private Dictionary<string, double>? displayedSolution;
+
         private readonly DataGridView canonicalDgv;
         private readonly FlowLayoutPanel iterationsPanel;
         private readonly DataGridView optimalDgv;
@@ -77,6 +81,7 @@ namespace linear_program_ui.TabControllers
         {
             var tableau = new Tableau(linearProgram);
             LastTableau = tableau;
+            displayedSolution = null;
             TableDisplay.PopulateTableau(canonicalDgv, tableau, tableau.IterationHistory[0]);
             StyleDataGridView(canonicalDgv);
             canonicalDgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -134,7 +139,10 @@ namespace linear_program_ui.TabControllers
             }
 
             if (result != null)
-                PopulateOptimalSolution(result.Solution);
+            {
+                displayedSolution = IntegerSolutionRefiner.Refine(linearProgram, result) ?? result.Solution;
+                PopulateOptimalSolution(displayedSolution);
+            }
         }
 
         private static void SizeGridToContentHeight(DataGridView dgv)
@@ -234,10 +242,11 @@ namespace linear_program_ui.TabControllers
             sb.Append(TableDisplay.FormatAllIterations(LastTableau, $"---{outputHeader} – ALL ITERATIONS---"));
             sb.AppendLine();
 
-            if (LastResult != null)
+            var solution = displayedSolution ?? LastResult?.Solution;
+            if (solution != null)
             {
                 sb.AppendLine("---Optimal Tableau---");
-                foreach (var kvp in LastResult.Solution)
+                foreach (var kvp in solution)
                     sb.AppendLine($"{kvp.Key}: {kvp.Value}");
                 sb.AppendLine();
             }

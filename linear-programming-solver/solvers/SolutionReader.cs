@@ -7,8 +7,7 @@ namespace LinearProgrammingSolver.Solvers
     {
         Optimal,
         Unbounded,
-        // Can't detect infeasibility yet. SimplexSolver/DualSolver only print it,
-        // don't return it. "Optimal" here means converged, not feasible.
+        Infeasible,
     }
 
     public class LpResult

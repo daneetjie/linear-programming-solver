@@ -50,7 +50,7 @@ namespace LinearProgrammingSolver.Models
             Objective = program.Objective;
             VariableTypes = program.VariableTypes;
 
-            var expandedRows = ExpandConstraints(program.Constraints);
+            var expandedRows = ExpandConstraints(WithBinaryBounds(program));
             NumConstraintRows = expandedRows.Count;
             NumSlackVariables = expandedRows.Count(r => r.IsSlack);
             NumExcessVariables = expandedRows.Count(r => !r.IsSlack);
@@ -90,6 +90,29 @@ namespace LinearProgrammingSolver.Models
             var clone = new double[Matrix.GetLength(0), Matrix.GetLength(1)];
             Array.Copy(Matrix, clone, Matrix.Length);
             return clone;
+        }
+
+        // Appends an x_j <= 1 row for every variable declared 'bin' so binaries stay in [0, 1].
+        private static List<Constraint> WithBinaryBounds(LinearProgram program)
+        {
+            var constraints = new List<Constraint>(program.Constraints);
+
+            if (program.VariableTypes == null)
+                return constraints;
+
+            int numVariables = program.ObjectiveCoefficients.Length;
+
+            for (int j = 0; j < program.VariableTypes.Length && j < numVariables; j++)
+            {
+                if (!string.Equals(program.VariableTypes[j], "bin", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var coefficients = new double[numVariables];
+                coefficients[j] = 1;
+                constraints.Add(new Constraint(coefficients, "<=", 1));
+            }
+
+            return constraints;
         }
 
         private static List<ExpandedRow> ExpandConstraints(List<Constraint> constraints)
