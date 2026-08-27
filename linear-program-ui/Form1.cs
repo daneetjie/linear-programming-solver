@@ -230,7 +230,9 @@ namespace linear_program_ui
             if (currentProgram == null)
             {
                 MessageBox.Show("Please load an input file first.");
+                return;
             }
+
             knapSackTabController.Run(currentProgram);
         }
 
