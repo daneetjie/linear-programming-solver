@@ -16,7 +16,7 @@ namespace LinearProgrammingSolver.Solvers
         public List<List<double>> Matrix { get; set; }
         public List<string> ColumnHeaders { get; set; }
         public string Status { get; set; }
-        public bool IsIntergerSolution { get; set; }
+        public bool IsIntegerSolution { get; set; }
         public double ObjectiveValue { get; set; }
         public double[] VariableValues { get; set; }
     }
@@ -67,7 +67,7 @@ namespace LinearProgrammingSolver.Solvers
                 Matrix = CloneMatrix(canonicalMatrix),
                 ColumnHeaders = new List<string>(canonicalHeaders),
                 Status = "Initial canonical form before solving the LP relaxation.",
-                IsIntergerSolution = false,
+                IsIntegerSolution = false,
                 ObjectiveValue = 0,
                 VariableValues = null
             };
@@ -75,7 +75,7 @@ namespace LinearProgrammingSolver.Solvers
 
             var initialIteration = new CuttingPlaneIterationResult
             {
-                Label = "Initial LP relaxtion",
+                Label = "Initial LP relaxation",
                 CutNumber = 0,
                 Matrix = CloneMatrix(matrix),
                 ColumnHeaders = new List<string>(headers),
@@ -83,11 +83,11 @@ namespace LinearProgrammingSolver.Solvers
                 VariableValues = initialSolution.VariableValues
             };
 
-            if (initialSolution.IsInterger)
+            if (initialSolution.IsInteger)
             {
                 initialIteration.Status = $"Integer-feasible solution found immediately. Z = {initialSolution.ObjectiveValue:F3}";
 
-                initialIteration.IsIntergerSolution = true;
+                initialIteration.IsIntegerSolution = true;
                 runResult.Iterations.Add(initialIteration);
                 runResult.Best = new CuttingPlaneResult
                 {
@@ -119,7 +119,7 @@ namespace LinearProgrammingSolver.Solvers
                         Matrix = CloneMatrix(matrix),
                         ColumnHeaders = new List<string>(headers),
                         Status = $"Integer-feasible solution reached. Z = {finalSolution.ObjectiveValue:F3}",
-                        IsIntergerSolution = true,
+                        IsIntegerSolution = true,
                         ObjectiveValue = finalSolution.ObjectiveValue,
                         VariableValues = finalSolution.VariableValues
                     };
@@ -157,7 +157,7 @@ namespace LinearProgrammingSolver.Solvers
                         CutNumber = cut,
                         Matrix = CloneMatrix(matrix),
                         ColumnHeaders = new List<string>(headers),
-                        Status = $"Cut {cut}: model becasme infeasible after generating the Gomory cut from {basicVariable}."
+                        Status = $"Cut {cut}: model became infeasible after generating the Gomory cut from {basicVariable}."
                     };
 
                     runResult.Iterations.Add(infeasibleIteration);
@@ -177,14 +177,14 @@ namespace LinearProgrammingSolver.Solvers
                     ColumnHeaders = new List<string>(headers),
                     ObjectiveValue = solution.ObjectiveValue,
                     VariableValues = solution.VariableValues,
-                    IsIntergerSolution = solution.IsInterger,
+                    IsIntegerSolution = solution.IsInteger,
                     Status = $"Cut {cut}: Gomory cut generated from {basicVariable}. " +
                             $"New LP solution Z = {solution.ObjectiveValue:F3}"
                 };
 
                 runResult.Iterations.Add(iteration);
 
-                if (solution.IsInterger)
+                if (solution.IsInteger)
                 {
                     iteration.Status = $"Integer-feasible solution found after Cut {cut}. " + $"Z = {solution.ObjectiveValue:F3}";
 
@@ -377,7 +377,7 @@ namespace LinearProgrammingSolver.Solvers
 
         private class ExtractedSolution
         {
-            public bool IsInterger { get; set; }
+            public bool IsInteger { get; set; }
             public double ObjectiveValue { get; set; }
             public double[] VariableValues { get; set; }
         }
@@ -440,7 +440,7 @@ namespace LinearProgrammingSolver.Solvers
 
             return new ExtractedSolution
             {
-                IsInterger = isInteger,
+                IsInteger = isInteger,
                 ObjectiveValue = matrix[0][rhsCol],
                 VariableValues = values
             };

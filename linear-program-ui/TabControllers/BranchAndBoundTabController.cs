@@ -171,7 +171,7 @@ namespace linear_program_ui.TabControllers
 
             if (best == null || !best.Found)
             {
-                dgvBestCandidateBranchBound.Rows.Add("No interger-feasible solution found,", "");
+                dgvBestCandidateBranchBound.Rows.Add("No integer-feasible solution found", "");
                 return;
             }
             else
@@ -194,7 +194,7 @@ namespace linear_program_ui.TabControllers
         {
             if (LastRun == null)
             {
-                MessageBox.Show("Nothing to save/ Run solver first", "Save error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Nothing to save. Run the solver first.", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -230,11 +230,11 @@ namespace linear_program_ui.TabControllers
             }
             else
             {
-                sb.AppendLine("No interger-feasible solution found.");
+                sb.AppendLine("No integer-feasible solution found.");
             }
 
             File.WriteAllText(dialog.FileName, sb.ToString());
-            MessageBox.Show($"Output save to {dialog.FileName}", "Save Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Output saved to {dialog.FileName}", "Save Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 

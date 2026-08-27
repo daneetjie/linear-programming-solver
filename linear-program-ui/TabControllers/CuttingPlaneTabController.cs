@@ -90,7 +90,7 @@ namespace linear_program_ui.TabControllers
             {
                 var headerLabel = new Label
                 {
-                    Text = iteration.IsIntergerSolution ? $"{iteration.Label} \u2605 Interger Solution" : iteration.Label,
+                    Text = iteration.IsIntegerSolution ? $"{iteration.Label} \u2605 Integer Solution" : iteration.Label,
                     AutoSize = true,
                     Font = new Font(
                         "Segoe UI",
@@ -243,7 +243,7 @@ namespace linear_program_ui.TabControllers
 
             if (best == null || !best.Found)
             {
-                dgvBestCandidateCuttingPlane.Rows.Add("No interger-feasible solution found", "");
+                dgvBestCandidateCuttingPlane.Rows.Add("No integer-feasible solution found", "");
                 StyleDataGridView(dgvBestCandidateCuttingPlane, isNumeric: false);
                 SizeBestCandidateHeight(dgvBestCandidateCuttingPlane);
                 return;
@@ -267,7 +267,7 @@ namespace linear_program_ui.TabControllers
         {
             if (LastRun == null)
             {
-                MessageBox.Show("Nothing to save. Run solver first", "Save error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Nothing to save. Run the solver first.", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -339,12 +339,12 @@ namespace linear_program_ui.TabControllers
 
             else
             {
-                sb.AppendLine("No interger-feasible solution");
+                sb.AppendLine("No integer-feasible solution found.");
             }
 
             File.WriteAllText(dialog.FileName, sb.ToString());
 
-            MessageBox.Show($"Output save to {dialog.FileName}", "Save Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Output saved to {dialog.FileName}", "Save Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
