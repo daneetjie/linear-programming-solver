@@ -246,10 +246,7 @@ namespace linear_program_ui
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-
-
-            revisedController.SaveAllOutput();
-
+            primalController.SaveAllOutput();
         }
 
         private void btnSaveAnalysis_Click(object sender, EventArgs e)
