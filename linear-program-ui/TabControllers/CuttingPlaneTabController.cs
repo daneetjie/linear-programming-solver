@@ -117,18 +117,6 @@ namespace linear_program_ui.TabControllers
                 };
 
                 iterationsPanelCuttingPlane.Controls.Add(statusLabel);
-                //first iteration = canonical form
-
-
-                var iterLabel = new Label
-                {
-                    Text = iteration.Label,
-                    AutoSize = true,
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                    Margin = new Padding(15, 5, 5, 3)
-                };
-                iterationsPanelCuttingPlane.Controls.Add(iterLabel);
-
 
                 //Tableau
 
@@ -256,21 +244,21 @@ namespace linear_program_ui.TabControllers
             if (best == null || !best.Found)
             {
                 dgvBestCandidateCuttingPlane.Rows.Add("No interger-feasible solution found", "");
+                StyleDataGridView(dgvBestCandidateCuttingPlane, isNumeric: false);
+                SizeBestCandidateHeight(dgvBestCandidateCuttingPlane);
                 return;
             }
-            else
-            {
 
-                if (best.VariableValues != null)
+            if (best.VariableValues != null)
+            {
+                for (int j = 0; j < best.VariableValues.Length; j++)
                 {
-                    for (int j = 0; j < best.VariableValues.Length; j++)
-                    {
-                        dgvBestCandidateCuttingPlane.Rows.Add($"X{j + 1}", Math.Round(best.VariableValues[j], 3));
-                    }
+                    dgvBestCandidateCuttingPlane.Rows.Add($"X{j + 1}", Math.Round(best.VariableValues[j], 3));
                 }
             }
-            StyleDataGridView(dgvBestCandidateCuttingPlane, isNumeric: false);
+
             dgvBestCandidateCuttingPlane.Rows.Add("Z", Math.Round(best.ObjectiveValue, 3));
+            StyleDataGridView(dgvBestCandidateCuttingPlane, isNumeric: false);
             SizeBestCandidateHeight(dgvBestCandidateCuttingPlane);
         }
 
