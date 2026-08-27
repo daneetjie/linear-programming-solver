@@ -1,6 +1,7 @@
-﻿using LinearProgrammingSolver.Models;
+using LinearProgrammingSolver.Models;
 using LinearProgrammingSolver.Solvers;
 using linear_programming_solver.UI;
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,9 @@ namespace linear_program_ui
 
         private Tableau lastSensitivityTableau;
         private readonly FlowLayoutPanel sensitivityIterationsPanel;
-        public SensitivityTab(ComboBox cmboSensitivity, ComboBox cmbTarget, TextBox txtNewData, NumericUpDown numNewValue, DataGridView dgvResults, DataGridView dgvOptimalTableau, FlowLayoutPanel sensitivityIterationsPanel)
+        private readonly Label lblTarget;
+        private readonly Label lblExtraInput;
+        public SensitivityTab(ComboBox cmboSensitivity, ComboBox cmbTarget, TextBox txtNewData, NumericUpDown numNewValue, DataGridView dgvResults, DataGridView dgvOptimalTableau, FlowLayoutPanel sensitivityIterationsPanel, Label lblTarget, Label lblExtraInput)
         {
             this.cmboSensitivity = cmboSensitivity;
             this.cmbTarget = cmbTarget;
@@ -31,12 +34,98 @@ namespace linear_program_ui
             this.dgvResults = dgvResults;
             this.dgvOptimalTableau = dgvOptimalTableau;
             this.sensitivityIterationsPanel = sensitivityIterationsPanel;
+            this.lblTarget = lblTarget;
+            this.lblExtraInput = lblExtraInput;
 
             sensitivityIterationsPanel.FlowDirection = FlowDirection.TopDown;
             sensitivityIterationsPanel.WrapContents = false;
             sensitivityIterationsPanel.AutoScroll = true;
             sensitivityIterationsPanel.Padding = new Padding(5);
             sensitivityIterationsPanel.Resize += (_, _) => ResizeIterationGrids();
+        }
+        private static void StyleDataGridView(DataGridView dgv, bool isNumeric = true)
+        {
+            Color softBlue = Color.FromArgb(240, 248, 255);
+
+            dgv.VirtualMode = false;
+            dgv.BackgroundColor = softBlue;
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.RowHeadersVisible = false;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToResizeRows = false;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+
+            dgv.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(70, 130, 180),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            };
+
+            dgv.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = softBlue,
+                Font = new Font("Consolas", 9f),
+                Alignment = isNumeric
+                    ? DataGridViewContentAlignment.MiddleRight
+                    : DataGridViewContentAlignment.MiddleLeft
+            };
+
+            dgv.AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(230, 240, 255)
+            };
+        }
+
+        private static void SizeGridToContentHeight(DataGridView dgv)
+        {
+            if (dgv.Rows.Count == 0) return;
+
+            dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dgv.PerformLayout();
+
+            int height = dgv.ColumnHeadersHeight + 2;
+            foreach (DataGridViewRow row in dgv.Rows)
+                height += row.Height;
+
+            dgv.Height = height + 6;
+            dgv.ScrollBars = ScrollBars.None;
+        }
+
+        private void SizeGridToContents(DataGridView dgv)
+        {
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dgv.PerformLayout();
+
+            int width = 2;
+            foreach (DataGridViewColumn column in dgv.Columns)
+                width += column.Width;
+            width += 20;
+
+            int height = dgv.ColumnHeadersHeight + 2;
+            foreach (DataGridViewRow row in dgv.Rows)
+                height += row.Height;
+            height += 4;
+
+            int maxWidth = Math.Max(850, sensitivityIterationsPanel.ClientSize.Width - 50);
+
+            if (width > maxWidth)
+            {
+                dgv.Width = maxWidth;
+                dgv.ScrollBars = ScrollBars.Horizontal;
+                dgv.Height = height + SystemInformation.HorizontalScrollBarHeight;
+            }
+            else
+            {
+                dgv.Width = width;
+                dgv.ScrollBars = ScrollBars.None;
+                dgv.Height = height;
+            }
         }
 
 
@@ -63,24 +152,24 @@ namespace linear_program_ui
                     AllowUserToAddRows = false,
                     AllowUserToDeleteRows = false,
                     RowHeadersVisible = false,
-                    ScrollBars = ScrollBars.Both,
+                    ScrollBars = ScrollBars.None,
                     AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells,
-                    Margin = new Padding(5),
-                    Height = 220
+                    Margin = new Padding(15, 0, 5, 10),
                 };
 
                 TableDisplay.PopulateTableau(dgv, newTableau, newTableau.IterationHistory[i]);
+                StyleDataGridView(dgv);
+                SizeGridToContents(dgv);
                 sensitivityIterationsPanel.Controls.Add(label);
                 sensitivityIterationsPanel.Controls.Add(dgv);
             }
 
-            ResizeIterationGrids();
             sensitivityIterationsPanel.PerformLayout();
         }
 
         public void SaveSensitivityIterationsToFile()
         {
-            if(lastSensitivityTableau == null)
+            if (lastSensitivityTableau == null)
             {
                 MessageBox.Show("No sensitivity iterations to save. Run a change first");
                 return;
@@ -97,10 +186,10 @@ namespace linear_program_ui
                 return;
 
             string operation = cmboSensitivity.Text;
-            var target = cmbTarget.Text ;
+            var target = cmbTarget.Text;
             double value = double.Parse(numNewValue.Value.ToString());
 
-            File.WriteAllText(dialog.FileName,$"{operation},{target},{value}, \n {TableDisplay.FormatAllIterations(lastSensitivityTableau)},---SENSITIVITY ANALYSIS ITERATIONS---");
+            File.WriteAllText(dialog.FileName, $"{operation},{target},{value}, \n {TableDisplay.FormatAllIterations(lastSensitivityTableau)},---SENSITIVITY ANALYSIS ITERATIONS---");
             MessageBox.Show($"Saved to: \n {dialog.FileName}");
         }
 
@@ -133,7 +222,16 @@ namespace linear_program_ui
             var matrix = tableau.IterationHistory.Count > 0
                 ? tableau.IterationHistory[tableau.IterationHistory.Count - 1]
                 : tableau.Matrix;
+
             TableDisplay.PopulateTableau(dgvOptimalTableau, tableau, matrix);
+            StyleDataGridView(dgvOptimalTableau);
+            dgvOptimalTableau.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            SizeGridToContentHeight(dgvOptimalTableau);
+
+            if (dgvOptimalTableau.PreferredSize.Width > dgvOptimalTableau.Width)
+            {
+                dgvOptimalTableau.ScrollBars = ScrollBars.Horizontal;
+            }
         }
 
         private List<string> GetNonBasicVariables()
@@ -184,6 +282,7 @@ namespace linear_program_ui
             foreach (var item in items)
                 cmbTarget.Items.Add(item);
             cmbTarget.Visible = cmbTarget.Items.Count > 0;
+            lblTarget.Visible = cmbTarget.Visible;
             if (cmbTarget.Items.Count > 0)
                 cmbTarget.SelectedIndex = 0;
         }
@@ -216,7 +315,9 @@ namespace linear_program_ui
             dgvResults.Columns.Add("LowerBound", "Lower Bound");
             dgvResults.Columns.Add("UpperBound", "Upper Bound");
             dgvResults.Rows.Add(labelValue, FormatBound(lower), FormatBound(upper));
-            dgvResults.AutoResizeColumns();
+            StyleDataGridView(dgvResults, isNumeric: false);
+            dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            SizeGridToContentHeight(dgvResults);
         }
 
         private void ShowNonBasicRange(string variableName)
@@ -240,7 +341,7 @@ namespace linear_program_ui
             ShowRange("Constraint", constraintLabel, lower, upper);
         }
 
-       
+
 
         private void DisplayShadowPrices()
         {
@@ -251,7 +352,9 @@ namespace linear_program_ui
             dgvResults.Columns.Add("ShadowPrice", "Shadow Price");
             foreach (var kvp in prices)
                 dgvResults.Rows.Add(kvp.Key, kvp.Value);
-            dgvResults.AutoResizeColumns();
+            StyleDataGridView(dgvResults, isNumeric: false);
+            dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            SizeGridToContentHeight(dgvResults);
         }
 
         private void AddNewActivity(string input)
@@ -271,6 +374,7 @@ namespace linear_program_ui
 
         private void AddNewConstraint(string input)
         {
+            string normalizedInput = input.Replace("<=", " <= ").Replace(">=", " >= ").Replace("=", " = ");
             var tokens = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var opIndex = Array.FindIndex(tokens, t => t == "<=" || t == ">=" || t == "=");
             if (opIndex == -1)
@@ -312,7 +416,7 @@ namespace linear_program_ui
             ShowRange("Entry", target, lower, upper);
         }
 
-    
+
 
         private void ShowSolutionInGrid(SimplexResult result)
         {
@@ -322,7 +426,9 @@ namespace linear_program_ui
             dgvResults.Columns.Add("Value", "Value");
             foreach (var kvp in result.Solution)
                 dgvResults.Rows.Add(kvp.Key, kvp.Value);
-            dgvResults.AutoResizeColumns();
+            StyleDataGridView(dgvResults, isNumeric: false);
+            dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            SizeGridToContentHeight(dgvResults);
         }
 
         private void ShowTextResult(string title, string body)
@@ -332,7 +438,9 @@ namespace linear_program_ui
             dgvResults.Columns.Add("Result", title);
             foreach (var line in body.Split('\n', StringSplitOptions.RemoveEmptyEntries))
                 dgvResults.Rows.Add(line.TrimEnd('\r'));
-            dgvResults.AutoResizeColumns();
+            StyleDataGridView(dgvResults, isNumeric: false);
+            dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            SizeGridToContentHeight(dgvResults);
         }
 
         private void ApplyDuality()
@@ -403,7 +511,7 @@ namespace linear_program_ui
                             var (result, tab) = SensitivityAnalysis.ApplyRhsChangeWithTableau(program, rowIndex, (double)numNewValue.Value);
                             ShowSensitivityTableau(result, tab);
                         }
-                            
+
                         break;
                     case "Range of selected variable in a non-basic variable column":
                         if (TryGetSelectedTarget(out string colRange))
@@ -451,8 +559,10 @@ namespace linear_program_ui
         {
             cmbTarget.Items.Clear();
             cmbTarget.Visible = false;
+            lblTarget.Visible = false;
             txtNewData.Visible = false;
             numNewValue.Visible = false;
+            lblExtraInput.Visible = false;
 
             if (tableau == null || lastResult == null)
                 return;
@@ -492,6 +602,8 @@ namespace linear_program_ui
                     txtNewData.PlaceholderText = $"coeffs then operator and RHS — e.g. 1 2 <= 10";
                     break;
             }
+
+            lblExtraInput.Visible = txtNewData.Visible || numNewValue.Visible;
         }
     }
 }

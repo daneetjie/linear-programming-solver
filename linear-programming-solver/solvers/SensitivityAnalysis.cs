@@ -223,80 +223,60 @@ namespace LinearProgrammingSolver.Solvers
             int m = primal.Constraints.Count;
             int n = primal.ObjectiveCoefficients.Length;
 
-            var dualVars = new List<(double objCoeff, double[] column, string type)>();
-
-            for (int i = 0; i < m; i++)
-            {
-                var constraint = primal.Constraints[i];
-                var column = new double[n];
-                for (int j = 0; j < n; j++)
-                    column[j] = constraint.Coefficients[j];
-
-                string sign = constraint.Operator;
-                bool nonnegative;
-                bool nonpositive;
-                if (primalIsMax)
-                {
-                    nonnegative = sign == "<=";
-                    nonpositive = sign == ">=";
-                }
-                else
-                {
-                    nonnegative = sign == ">=";
-                    nonpositive = sign == "<=";
-                }
-
-                if (nonnegative)
-                {
-                    dualVars.Add((constraint.RightHandSide, column, "+"));
-                }
-                else if (nonpositive)
-                {
-                    var flipped = new double[n];
-                    for (int j = 0; j < n; j++)
-                        flipped[j] = -column[j];
-                    dualVars.Add((-constraint.RightHandSide, flipped, "+"));
-                }
-                else
-                {
-                    dualVars.Add((constraint.RightHandSide, (double[])column.Clone(), "+"));
-                    var flipped = new double[n];
-                    for (int j = 0; j < n; j++)
-                        flipped[j] = -column[j];
-                    dualVars.Add((-constraint.RightHandSide, flipped, "+"));
-                }
-            }
-
-            int d = dualVars.Count;
             var dual = new LinearProgram
             {
                 Objective = primalIsMax ? "min" : "max",
-                ObjectiveCoefficients = new double[d],
-                VariableTypes = new string[d]
+                ObjectiveCoefficients = new double[m],
+                VariableTypes = new string[m]
             };
 
-            for (int k = 0; k < d; k++)
+            for (int i = 0; i < m; i++)
             {
-                dual.ObjectiveCoefficients[k] = dualVars[k].objCoeff;
-                dual.VariableTypes[k] = "+";
+                dual.ObjectiveCoefficients[i] = primal.Constraints[i].RightHandSide;
+                string op = primal.Constraints[i].Operator;
+                if (primalIsMax)
+                {
+                    //max primal
+                    dual.VariableTypes[i] = op == "<=" ? "+" : (op == ">=" ? "-" : "urs");
+                }
+                else
+                {
+                    // min primal
+                    dual.VariableTypes[i] = op == ">=" ? "+" : (op == "<=" ? "-" : "urs");
+                }
             }
 
             for (int j = 0; j < n; j++)
             {
-                var coeffs = new double[d];
-                for (int k = 0; k < d; k++)
-                    coeffs[k] = dualVars[k].column[j];
+                var coeffs = new double[m];
+                for (int i = 0; i < m; i++)
+                    coeffs[i] = primal.Constraints[i].Coefficients[j];
 
-                string primalType = j < primal.VariableTypes.Length ? primal.VariableTypes[j] : "+";
-                string op;
-                if (primalType == "-")
-                    op = primalIsMax ? "<=" : ">=";
-                else if (primalType == "urs")
-                    op = "=";
+                string primalVarType = j < primal.VariableTypes.Length ? primal.VariableTypes[j] : "+";
+                string dualOp;
+
+                if (primalIsMax)
+                {
+                    // max primal
+                    dualOp = primalVarType switch
+                    {
+                        "+" or "bin" => ">=",   // x ≥ 0  ->  dual constraint ≥
+                        "-" => "<=",   // x ≤ 0  ->  dual constraint ≤
+                        _ => "="     // free    ->  dual constraint =
+                    };
+                }
                 else
-                    op = primalIsMax ? ">=" : "<=";
+                {
+                    // min primal
+                    dualOp = primalVarType switch
+                    {
+                        "+" or "bin" => "<=",
+                        "-" => ">=",
+                        _ => "="
+                    };
+                }
 
-                dual.Constraints.Add(new Constraint(coeffs, op, primal.ObjectiveCoefficients[j]));
+                dual.Constraints.Add(new Constraint(coeffs, dualOp, primal.ObjectiveCoefficients[j]));
             }
 
             return dual;
@@ -305,21 +285,23 @@ namespace LinearProgrammingSolver.Solvers
         public static string FormatProgram(LinearProgram program)
         {
             var sb = new StringBuilder();
-            sb.Append(program.Objective);
+            sb.Append(program.Objective.ToUpper());
             for (int j = 0; j < program.ObjectiveCoefficients.Length; j++)
             {
                 double c = program.ObjectiveCoefficients[j];
-                sb.Append(c >= 0 ? $" +{c} y{j + 1}" : $" {c} y{j + 1}");
+                if (j == 0) sb.Append(c >= 0 ? $" +{c} y{j + 1}" : $" {c} y{j + 1}");
+                else sb.Append(c >= 0 ? $" + {c} y{j + 1}" : $" - {Math.Abs(c)} y{j + 1}");
             }
             sb.AppendLine();
-
+            //constraints
             for (int i = 0; i < program.Constraints.Count; i++)
             {
                 var constraint = program.Constraints[i];
                 for (int j = 0; j < constraint.Coefficients.Length; j++)
                 {
                     double a = constraint.Coefficients[j];
-                    sb.Append(j == 0 ? $"{a} y{j + 1}" : (a >= 0 ? $" +{a} y{j + 1}" : $" {a} y{j + 1}"));
+                    if (j == 0) sb.Append(a >= 0 ? $"{a} y{j + 1}" : $"{a} y{j + 1}");
+                    else sb.Append(a >= 0 ? $" + {a} y{j + 1}" : $" - {Math.Abs(a)} y{j + 1}");
                 }
                 sb.AppendLine($" {constraint.Operator} {constraint.RightHandSide}");
             }
@@ -330,7 +312,32 @@ namespace LinearProgrammingSolver.Solvers
 
         public static SimplexResult SolveDual(LinearProgram primal)
         {
-            return SolveProgram(BuildDual(primal));
+            // Solve the primal first (we need its optimal tableau)
+            var (primalResult, primalTableau) = SolveProgramWithTableau(primal);
+
+            // The dual solution is exactly the shadow prices
+            var shadowPrices = ShadowPrices(primalTableau);
+
+            var dualSolution = new Dictionary<string, double>();
+            double dualZ = 0;
+
+            int i = 0;
+            foreach (var kvp in shadowPrices)
+            {
+                // y1, y2, ... 
+                string dualVarName = $"y{i + 1}";
+                dualSolution[dualVarName] = kvp.Value;
+                dualZ += kvp.Value * primal.Constraints[i].RightHandSide;
+                i++;
+            }
+
+            dualSolution["Z"] = Math.Round(dualZ, 3);
+
+            return new SimplexResult
+            {
+                Solution = dualSolution,
+                // you can leave Basis / other fields null or empty
+            };
         }
 
         public static string VerifyDuality(LinearProgram primal, SimplexResult primalResult)

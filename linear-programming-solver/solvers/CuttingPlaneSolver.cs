@@ -1,58 +1,209 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using LinearProgrammingSolver.Models;
 
 namespace LinearProgrammingSolver.Solvers
 {
-   
+
+    public class CuttingPlaneIterationResult
+    {
+        public string Label { get; set; }
+        public int CutNumber { get; set; }
+
+
+        //SNAPSHOT OF TABLEAU AT THIS STAGE
+        public List<List<double>> Matrix { get; set; }
+        public List<string> ColumnHeaders { get; set; }
+        public string Status { get; set; }
+        public bool IsIntergerSolution { get; set; }
+        public double ObjectiveValue { get; set; }
+        public double[] VariableValues { get; set; }
+    }
+
+    public class CuttingPlaneRunResult
+    {
+        public List<CuttingPlaneIterationResult> Iterations { get; set; } = new();
+
+        public CuttingPlaneResult Best { get; set; }
+
+    }
+
+    public class CuttingPlaneResult
+    {
+        public bool Found { get; set; }
+        public double ObjectiveValue { get; set; }
+        public double[] VariableValues { get; set; }
+        public string SourceIterationLabel { get; set; }
+    }
+
     public static class CuttingPlaneSolver
     {
         private const double Tolerance = 1e-6;
         private const int MaxCuts = 50;
 
-        public static void Solve(LinearProgram program)
+        public static CuttingPlaneRunResult Solve(LinearProgram program)
         {
+
+            var runResult = new CuttingPlaneRunResult();
             var tableau = new Tableau(program);
+            var canonicalMatrix = ToJagged(tableau.Matrix);
+            var canonicalHeaders = new List<string>(tableau.ColumnHeaders);
+
+            int numVars = tableau.NumVariables;
+
             SolveRelaxation(tableau);
 
             var matrix = ToJagged(tableau.Matrix);
             var headers = new List<string>(tableau.ColumnHeaders);
-            int numVars = tableau.NumVariables;
 
-            Console.WriteLine();
-            Console.WriteLine("Initial (LP relaxation) optimal tableau:");
-            PrintMatrix(matrix, headers);
+
+            var initialSolution = ExtractSolution(matrix, headers, numVars);
+
+            var canonicalIteration = new CuttingPlaneIterationResult
+            {
+                Label = "Canonical Form",
+                CutNumber = 0,
+                Matrix = CloneMatrix(canonicalMatrix),
+                ColumnHeaders = new List<string>(canonicalHeaders),
+                Status = "Initial canonical form before solving the LP relaxation.",
+                IsIntergerSolution = false,
+                ObjectiveValue = 0,
+                VariableValues = null
+            };
+            runResult.Iterations.Add(canonicalIteration);
+
+            var initialIteration = new CuttingPlaneIterationResult
+            {
+                Label = "Initial LP relaxtion",
+                CutNumber = 0,
+                Matrix = CloneMatrix(matrix),
+                ColumnHeaders = new List<string>(headers),
+                ObjectiveValue = initialSolution.ObjectiveValue,
+                VariableValues = initialSolution.VariableValues
+            };
+
+            if (initialSolution.IsInterger)
+            {
+                initialIteration.Status = $"Integer-feasible solution found immediately. Z = {initialSolution.ObjectiveValue:F3}";
+
+                initialIteration.IsIntergerSolution = true;
+                runResult.Iterations.Add(initialIteration);
+                runResult.Best = new CuttingPlaneResult
+                {
+                    Found = true,
+                    ObjectiveValue = initialSolution.ObjectiveValue,
+                    VariableValues = initialSolution.VariableValues,
+                    SourceIterationLabel = initialIteration.Label
+                };
+
+                return runResult;
+            }
+
+            initialIteration.Status = $"LP relaxation solved. Fractional solution found. Z = {initialSolution.ObjectiveValue:F3}";
+            runResult.Iterations.Add(initialIteration);
+
+
 
             for (int cut = 1; cut <= MaxCuts; cut++)
             {
                 int fracRow = FindFractionalBasicRow(matrix, numVars);
                 if (fracRow == -1)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("Integer-feasible solution reached.");
-                    PrintSolution(matrix, headers, numVars);
-                    return;
+                    var finalSolution = ExtractSolution(matrix, headers, numVars);
+
+                    var finalIteration = new CuttingPlaneIterationResult
+                    {
+                        Label = $"Cut {cut - 1} - Final",
+                        CutNumber = cut - 1,
+                        Matrix = CloneMatrix(matrix),
+                        ColumnHeaders = new List<string>(headers),
+                        Status = $"Integer-feasible solution reached. Z = {finalSolution.ObjectiveValue:F3}",
+                        IsIntergerSolution = true,
+                        ObjectiveValue = finalSolution.ObjectiveValue,
+                        VariableValues = finalSolution.VariableValues
+                    };
+
+                    runResult.Iterations.Add(finalIteration);
+
+                    runResult.Best = new CuttingPlaneResult
+                    {
+                        Found = true,
+                        ObjectiveValue = finalSolution.ObjectiveValue,
+                        VariableValues = finalSolution.VariableValues,
+                        SourceIterationLabel = finalIteration.Label
+                    };
+
+                    return runResult;
                 }
 
-                Console.WriteLine();
-                Console.WriteLine($"Cut {cut}: generating Gomory cut from row {fracRow} (basic variable {headers[BasicColumnForRow(matrix, fracRow, numVars)]}).");
+
+                int basicColumn = BasicColumnForRow(matrix, fracRow, numVars, true);
+
+                string basicVariable = basicColumn >= 0 ? headers[basicColumn] : $"Row{fracRow}";
 
                 AddGomoryCut(matrix, headers, fracRow);
-                PrintMatrix(matrix, headers);
 
-                if (!DualPivotToFeasible(matrix, headers))
+
+                // solve the LP relaxation using their existing solvers ---
+
+                bool feasible = DualPivotToFeasible(matrix, headers);
+
+                if (!feasible)
                 {
-                    Console.WriteLine("Model is infeasible after this cut.");
-                    return;
+                    var infeasibleIteration = new CuttingPlaneIterationResult
+                    {
+                        Label = $"Cut {cut}",
+                        CutNumber = cut,
+                        Matrix = CloneMatrix(matrix),
+                        ColumnHeaders = new List<string>(headers),
+                        Status = $"Cut {cut}: model becasme infeasible after generating the Gomory cut from {basicVariable}."
+                    };
+
+                    runResult.Iterations.Add(infeasibleIteration);
+
+                    runResult.Best = new CuttingPlaneResult { Found = false };
+
+                    return runResult;
                 }
 
-                PrintMatrix(matrix, headers);
+                var solution = ExtractSolution(matrix, headers, numVars);
+
+                var iteration = new CuttingPlaneIterationResult
+                {
+                    Label = $"Cut {cut}",
+                    CutNumber = cut,
+                    Matrix = CloneMatrix(matrix),
+                    ColumnHeaders = new List<string>(headers),
+                    ObjectiveValue = solution.ObjectiveValue,
+                    VariableValues = solution.VariableValues,
+                    IsIntergerSolution = solution.IsInterger,
+                    Status = $"Cut {cut}: Gomory cut generated from {basicVariable}. " +
+                            $"New LP solution Z = {solution.ObjectiveValue:F3}"
+                };
+
+                runResult.Iterations.Add(iteration);
+
+                if (solution.IsInterger)
+                {
+                    iteration.Status = $"Integer-feasible solution found after Cut {cut}. " + $"Z = {solution.ObjectiveValue:F3}";
+
+                    runResult.Best = new CuttingPlaneResult
+                    {
+                        Found = true,
+                        ObjectiveValue = solution.ObjectiveValue,
+                        VariableValues = solution.VariableValues,
+                        SourceIterationLabel = iteration.Label
+                    };
+
+                    return runResult;
+                }
             }
 
-            Console.WriteLine($"Cutting plane did not converge within {MaxCuts} cuts.");
-        }
+            runResult.Best = new CuttingPlaneResult { Found = false };
 
-        // solve the LP relaxation using their existing solvers ---
+            return runResult;
+        }
 
         private static void SolveRelaxation(Tableau tableau)
         {
@@ -78,14 +229,17 @@ namespace LinearProgrammingSolver.Solvers
         {
             int rhsCol = matrix[0].Count - 1;
 
-            for (int i = 1; i < matrix.Count; i++)
+            for (int row = 1; row < matrix.Count; row++)
             {
-                int basicCol = BasicColumnForRow(matrix, i, numVars, decisionVarsOnly: true);
+                int basicCol = BasicColumnForRow(matrix, row, numVars, decisionVarsOnly: true);
+
+
                 if (basicCol == -1) continue;
 
-                double rhs = matrix[i][rhsCol];
+                double rhs = matrix[row][rhsCol];
+
                 if (Math.Abs(rhs - Math.Round(rhs)) > Tolerance)
-                    return i;
+                    return row;
             }
 
             return -1;
@@ -98,10 +252,10 @@ namespace LinearProgrammingSolver.Solvers
             int rhsCol = matrix[0].Count - 1;
             int upperBound = decisionVarsOnly ? numVars : rhsCol;
 
-            for (int j = 0; j < upperBound; j++)
+            for (int col = 0; col < upperBound; col++)
             {
-                if (Math.Abs(matrix[row][j] - 1.0) < Tolerance && IsUnitColumn(matrix, j, row))
-                    return j;
+                if (Math.Abs(matrix[row][col] - 1.0) < Tolerance && IsUnitColumn(matrix, col, row))
+                    return col;
             }
 
             return -1;
@@ -109,10 +263,10 @@ namespace LinearProgrammingSolver.Solvers
 
         private static bool IsUnitColumn(List<List<double>> matrix, int col, int expectedOneRow)
         {
-            for (int i = 0; i < matrix.Count; i++)
+            for (int row = 0; row < matrix.Count; row++)
             {
-                double v = matrix[i][col];
-                if (i == expectedOneRow)
+                double v = matrix[row][col];
+                if (row == expectedOneRow)
                 {
                     if (Math.Abs(v - 1.0) > Tolerance) return false;
                 }
@@ -130,10 +284,10 @@ namespace LinearProgrammingSolver.Solvers
             var source = matrix[sourceRow];
 
             var cutRow = new List<double>(new double[matrix[0].Count]);
-            for (int j = 0; j < rhsCol; j++)
+            for (int col = 0; col < rhsCol; col++)
             {
-                double frac = Frac(source[j]);
-                cutRow[j] = -frac; // -frac(a_ij) x_j ... + g = -frac(b_i)
+                double frac = Frac(source[col]);
+                cutRow[col] = -frac;
             }
             double rhsFrac = Frac(source[rhsCol]);
             cutRow[rhsCol] = -rhsFrac;
@@ -144,7 +298,7 @@ namespace LinearProgrammingSolver.Solvers
             cutRow.Insert(rhsCol, 1.0); // this row's own cut-slack coefficient
 
             matrix.Add(cutRow);
-            headers.Insert(headers.Count - 1, $"g{matrix.Count - 1}");
+            headers.Insert(headers.Count - 1, $"s{matrix.Count - 1}");
         }
 
         private static double Frac(double v)
@@ -163,6 +317,7 @@ namespace LinearProgrammingSolver.Solvers
             {
                 int pivotRow = -1;
                 double mostNegative = -Tolerance;
+                //most negative value
                 for (int i = 1; i < matrix.Count; i++)
                 {
                     if (matrix[i][rhsCol] < mostNegative)
@@ -171,22 +326,23 @@ namespace LinearProgrammingSolver.Solvers
                         pivotRow = i;
                     }
                 }
-
+                //all rhs values are feasible
                 if (pivotRow == -1)
                     return true; // primal feasible again - done
 
                 int pivotCol = -1;
                 double bestRatio = double.PositiveInfinity;
-                for (int j = 0; j < rhsCol; j++)
+                //for entering var
+                for (int col = 0; col < rhsCol; col++)
                 {
-                    double a = matrix[pivotRow][j];
-                    if (a >= -Tolerance) continue;
+                    double coeff = matrix[pivotRow][col];
+                    if (coeff >= -Tolerance) continue;
 
-                    double ratio = matrix[0][j] / a;
+                    double ratio = matrix[0][col] / coeff;
                     if (ratio < bestRatio)
                     {
                         bestRatio = ratio;
-                        pivotCol = j;
+                        pivotCol = col;
                     }
                 }
 
@@ -204,19 +360,92 @@ namespace LinearProgrammingSolver.Solvers
             double pivotValue = matrix[pivotRow][pivotCol];
             int numCols = matrix[0].Count;
 
-            for (int j = 0; j < numCols; j++)
-                matrix[pivotRow][j] /= pivotValue;
+            for (int col = 0; col < numCols; col++)
+                matrix[pivotRow][col] /= pivotValue;
 
-            for (int i = 0; i < matrix.Count; i++)
+            for (int row = 0; row < matrix.Count; row++)
             {
-                if (i == pivotRow) continue;
-                double factor = matrix[i][pivotCol];
+                if (row == pivotRow) continue;
+                double factor = matrix[row][pivotCol];
                 if (Math.Abs(factor) < Tolerance) continue;
 
-                for (int j = 0; j < numCols; j++)
-                    matrix[i][j] -= factor * matrix[pivotRow][j];
+                for (int col = 0; col < numCols; col++)
+                    matrix[row][col] -= factor * matrix[pivotRow][col];
             }
         }
+
+        private class ExtractedSolution
+        {
+            public bool IsInterger { get; set; }
+            public double ObjectiveValue { get; set; }
+            public double[] VariableValues { get; set; }
+        }
+
+        private static ExtractedSolution ExtractSolution(List<List<double>> matrix, List<string> headers, int numVars)
+        {
+            int rhsCol = matrix[0].Count - 1;
+
+            var values = new double[numVars];
+
+            for (int variable = 0;
+                 variable < numVars;
+                 variable++)
+            {
+                int basicRow = -1;
+                int oneCount = 0;
+                bool isBasic = true;
+
+                for (int row = 0;
+                     row < matrix.Count;
+                     row++)
+                {
+                    double value = matrix[row][variable];
+
+                    if (Math.Abs(value - 1.0) < Tolerance)
+                    {
+                        oneCount++;
+                        basicRow = row;
+                    }
+                    else if (Math.Abs(value) > Tolerance)
+                    {
+                        isBasic = false;
+                        break;
+                    }
+                }
+
+                if (isBasic &&
+                    oneCount == 1 &&
+                    basicRow > 0)
+                {
+                    values[variable] =
+                        matrix[basicRow][rhsCol];
+                }
+                else
+                {
+                    values[variable] = 0.0;
+                }
+            }
+
+            bool isInteger = true;
+
+            foreach (double value in values)
+            {
+                if (Math.Abs(value - Math.Round(value)) > Tolerance)
+                {
+                    isInteger = false;
+                    break;
+                }
+            }
+
+            return new ExtractedSolution
+            {
+                IsInterger = isInteger,
+                ObjectiveValue = matrix[0][rhsCol],
+                VariableValues = values
+            };
+        }
+
+
 
         // --- Utilities ---
 
@@ -226,53 +455,27 @@ namespace LinearProgrammingSolver.Solvers
             int cols = source.GetLength(1);
             var result = new List<List<double>>(rows);
 
-            for (int i = 0; i < rows; i++)
+            for (int row = 0; row < rows; row++)
             {
-                var row = new List<double>(cols);
-                for (int j = 0; j < cols; j++)
-                    row.Add(source[i, j]);
-                result.Add(row);
+                var newRow = new List<double>(cols);
+                for (int col = 0; col < cols; col++)
+                    newRow.Add(source[row, col]);
+                result.Add(newRow);
             }
 
             return result;
         }
 
-        private static void PrintMatrix(List<List<double>> matrix, List<string> headers)
+        private static List<List<double>> CloneMatrix(List<List<double>> source)
         {
-            foreach (var h in headers)
-                Console.Write(h.PadLeft(10));
-            Console.WriteLine();
+            var clone = new List<List<double>>();
 
-            foreach (var row in matrix)
+            foreach (var row in source)
             {
-                foreach (var v in row)
-                    Console.Write(Math.Round(v, 3).ToString().PadLeft(10));
-                Console.WriteLine();
-            }
-        }
-
-        private static void PrintSolution(List<List<double>> matrix, List<string> headers, int numVars)
-        {
-            int rhsCol = matrix[0].Count - 1;
-            var values = new double[numVars];
-
-            for (int j = 0; j < numVars; j++)
-            {
-                int basicRow = -1;
-                bool isBasic = true;
-                for (int i = 0; i < matrix.Count; i++)
-                {
-                    double v = matrix[i][j];
-                    if (Math.Abs(v - 1.0) < Tolerance) basicRow = i;
-                    else if (Math.Abs(v) > Tolerance) { isBasic = false; break; }
-                }
-                values[j] = (isBasic && basicRow > 0) ? matrix[basicRow][rhsCol] : 0.0;
+                clone.Add(new List<double>(row));
             }
 
-            Console.WriteLine("Optimal integer solution:");
-            for (int j = 0; j < numVars; j++)
-                Console.WriteLine($"  {headers[j]} = {values[j]:F3}");
-            Console.WriteLine($"  Z = {matrix[0][rhsCol]:F3}");
+            return clone;
         }
     }
 }

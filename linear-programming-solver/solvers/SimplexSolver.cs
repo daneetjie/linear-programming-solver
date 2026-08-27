@@ -22,7 +22,7 @@ namespace LinearProgrammingSolver.Solvers
                 int pivotColumn = SelectPivotColumn(tableau.Matrix, rhsColumn);
                 if (pivotColumn == -1)
                 {
-                    return BuildResult(tableau, basis, rhsColumn);
+                    return SolutionBuilder.BuildResult(tableau, basis, rhsColumn);
                 }
 
                 int pivotRow = SelectPivotRow(tableau.Matrix, numRows, pivotColumn, rhsColumn);
@@ -41,35 +41,11 @@ namespace LinearProgrammingSolver.Solvers
             throw new InvalidOperationException($"Simplex did not converge after {MaxIterations} iterations.");
         }
 
-        private static SimplexResult BuildResult(Tableau tableau, int[] basis, int rhsColumn)
-        {
-            var values = new double[tableau.NumVariables];
-            for (int i = 0; i < basis.Length; i++)
-                if (basis[i] < tableau.NumVariables)
-                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
-            var solution = new Dictionary<string, double>();
-            for (int j = 0; j < tableau.NumVariables; j++)
-                solution[tableau.ColumnHeaders[j]] = Math.Round(values[j], 3);
-            solution["Z"] = Math.Round(tableau.Matrix[0, rhsColumn], 3);
-            return new SimplexResult { Solution = solution, Basis = basis };
 
-        }
 
-        private static Dictionary<string, double> BuildSolution(Tableau tableau, int[] basis, int rhsColumn)
-        {
-            var values = new double[tableau.NumVariables];
-            for (int i = 0; i < basis.Length; i++)
-                if (basis[i] < tableau.NumVariables)
-                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
 
-            var result = new Dictionary<string, double>();
-            for (int j = 0; j < tableau.NumVariables; j++)
-                result[tableau.ColumnHeaders[j]] = Math.Round(values[j], 3);
-            result["Z"] = Math.Round(tableau.Matrix[0, rhsColumn], 3);
 
-            return result;
 
-        }
 
 
 

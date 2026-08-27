@@ -14,8 +14,8 @@ namespace linear_programming_solver.UI
             dgv.Rows.Clear();
 
             dgv.Columns.Add("RowLabel", "");
-            foreach(var header in tableau.ColumnHeaders)
-            dgv.Columns.Add(header, header);
+            foreach (var header in tableau.ColumnHeaders)
+                dgv.Columns.Add(header, header);
 
             int numRows = matrix.GetLength(0);
             int numCols = matrix.GetLength(1);
@@ -27,17 +27,17 @@ namespace linear_programming_solver.UI
 
                 for (int j = 0; j < numCols; j++)
                 {
-                    rowValues[j + 1] = matrix[i, j];
-                 
+                    rowValues[j + 1] = Math.Round(matrix[i, j], 3);
+
                 }
                 dgv.Rows.Add(rowValues);
             }
 
-                dgv.AutoResizeColumns();
-                dgv.ReadOnly = true;
+            dgv.AutoResizeColumns();
+            dgv.ReadOnly = true;
 
 
-            }
+        }
 
 
         public static string FormatAllIterations(Tableau tableau, string heading = null)

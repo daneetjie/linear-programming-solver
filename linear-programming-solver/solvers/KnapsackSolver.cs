@@ -5,8 +5,40 @@ using LinearProgrammingSolver.Models;
 
 namespace LinearProgrammingSolver.Solvers
 {
+    public class KnapsackNodeResult
+    {
+        public string Label { get; set; }
+        public int Depth { get; set; }
+        public double CurrentValue { get; set; }
+        public double CurrentWeight { get; set; }
+        public double UpperBound { get; set; }
+        public double[] VariableValues { get; set; }
+        public string Status { get; set; }
+        public bool IsNewBest { get; set; }
+        public double[] ItemValues { get; set; }
+        public double[] ItemWeights { get; set; }
+        public double[] ItemRatios { get; set; }
+        public double Capacity { get; set; }
+    }
+
+    public class KnapsackResult
+    {
+        public bool Found { get; set; }
+        public double ObjectiveValue { get; set; }
+        public double[] VariableValues { get; set; }
+        public string SourceNodeLabel { get; set; }
+    }
+
+    public class KnapsackRunResult
+    {
+        public List<KnapsackNodeResult> Nodes { get; set; } = new();
+
+        public KnapsackResult Best { get; set; }
+    }
     public static class KnapsackSolver
     {
+        private const double Tolerance = 1e-9;
+
         private class Item
         {
             public int OriginalIndex;
@@ -17,11 +49,12 @@ namespace LinearProgrammingSolver.Solvers
 
         private class Node
         {
-            public int ItemsDecided;
-            public double CurrentValue;
-            public double CurrentWeight;
-            public bool[] Included;
-            public string Label;
+            public int ItemsDecided { get; set; }
+            public double CurrentValue { get; set; }
+            public double CurrentWeight { get; set; }
+            public bool[] Included { get; set; }
+            public int Depth { get; set; }
+            public string Label { get; set; }
 
             public Node Clone() => new Node
             {
@@ -29,19 +62,32 @@ namespace LinearProgrammingSolver.Solvers
                 CurrentValue = CurrentValue,
                 CurrentWeight = CurrentWeight,
                 Included = (bool[])Included.Clone(),
+                Depth = Depth,
                 Label = Label
             };
         }
 
-        public static void Solve(LinearProgram program)
+        public static KnapsackRunResult Solve(LinearProgram program)
         {
-            if (program.Constraints.Count != 1 || program.Constraints[0].Operator != "<="
-                || program.VariableTypes.Any(t => t != "bin"))
+            var runResult = new KnapsackRunResult();
+
+            if (!IsKnapSackModel(program))
             {
-                Console.WriteLine("Warning: this model isn't a standard single-constraint 0/1 knapsack " +
-                                   "(one '<=' constraint, all 'bin' variables). Proceeding using the first " +
-                                   "constraint as the capacity anyway - results may not be meaningful.");
+                runResult.Best = new KnapsackResult
+                {
+                    Found = false
+                };
+
+                runResult.Nodes.Add(new KnapsackNodeResult
+                {
+                    Label = "Root",
+                    Depth = 0,
+                    Status = "Model is not a standard 0/1 knapsack problem."
+                });
+
+                return runResult;
             }
+
 
             int n = program.ObjectiveCoefficients.Length;
             var constraint = program.Constraints[0];
@@ -65,103 +111,193 @@ namespace LinearProgrammingSolver.Solvers
 
             double bestValue = double.NegativeInfinity;
             bool[] bestIncluded = null;
+            string bestLabel = null;
             int nodeCounter = 0;
 
             while (stack.Count > 0)
             {
-                var node = stack.Pop();
+                Node node = stack.Pop();
                 nodeCounter++;
 
                 double bound = ComputeBound(sorted, node, capacity);
+                var nodeResult = new KnapsackNodeResult
+                {
+                    Label = $"Sub-problem {nodeCounter}: {node.Label}",
+                    Depth = node.Depth,
+                    CurrentValue = node.CurrentValue,
+                    CurrentWeight = node.CurrentWeight,
+                    UpperBound = bound,
+                    VariableValues = ConvertToVariableValues(node.Included),
+                    ItemValues = items.Select(x => x.Value).ToArray(),
+                    ItemWeights = items.Select(x => x.Weight).ToArray(),
+                    ItemRatios = items.Select(x => x.Ratio).ToArray(),
+                    Capacity = capacity,
+                    IsNewBest = false
+                };
 
-                Console.WriteLine();
-                Console.WriteLine($"--- Sub-problem {nodeCounter}: {node.Label} | value so far = {node.CurrentValue:F3}, weight so far = {node.CurrentWeight:F3}, bound = {bound:F3} ---");
+
 
                 if (bound <= bestValue + 1e-9)
                 {
-                    Console.WriteLine($"Fathomed - bound {bound:F3} cannot beat current best {bestValue:F3}.");
+                    nodeResult.Status = $"Fathomed - upper bound {bound:F3} " + $"cannot beat current best {bestValue:F3}.";
+                    runResult.Nodes.Add(nodeResult);
                     continue;
                 }
 
                 if (node.ItemsDecided == n)
                 {
-                    if (node.CurrentValue > bestValue)
+                    if (node.CurrentValue > bestValue + Tolerance)
                     {
                         bestValue = node.CurrentValue;
                         bestIncluded = (bool[])node.Included.Clone();
-                        Console.WriteLine($"New best candidate: Z = {bestValue:F3}");
+                        bestLabel = nodeResult.Label;
+                        nodeResult.IsNewBest = true;
+                        nodeResult.Status = $"Integer-feasible solution - NEW BEST. " + $"Z = {bestValue:F3}";
+
+
                     }
                     else
                     {
-                        Console.WriteLine("Complete assignment, not better than current best - fathomed.");
+                        nodeResult.Status = $"Integer-feasible solution, " + $"but not better than current best " + $"Z = {bestValue:F3}.";
                     }
+
+                    runResult.Nodes.Add(nodeResult);
                     continue;
                 }
 
-                var item = sorted[node.ItemsDecided];
-                string varName = $"x{item.OriginalIndex + 1}";
+                Item item = sorted[node.ItemsDecided];
+                string variableName = $"x{item.OriginalIndex + 1}";
+
+                nodeResult.Status =
+                    $"Branch on {variableName} " +
+                    $"(value = {item.Value:F3}, " +
+                    $"weight = {item.Weight:F3}, " +
+                    $"ratio = {item.Ratio:F3}). " +
+                    $"Upper bound = {bound:F3}.";
+
+                runResult.Nodes.Add(nodeResult);
 
                 // Explore "include" first - since items are sorted by ratio,
                 // this tends to reach good candidates sooner.
-                var excludeNode = node.Clone();
+                Node excludeNode = node.Clone();
                 excludeNode.ItemsDecided++;
-                excludeNode.Label = $"{node.Label} -> exclude {varName}";
+                excludeNode.Depth++;
+                excludeNode.Label = $"{node.Label} -> x{item.OriginalIndex + 1} = 0";
+
+                Node includeNode = node.Clone();
+
+                includeNode.ItemsDecided++;
+                includeNode.Depth++;
+                includeNode.Label = $"{node.Label} -> x{item.OriginalIndex + 1} = 1";
+                includeNode.Included[item.OriginalIndex] = true;
+                includeNode.CurrentValue += item.Value;
+                includeNode.CurrentWeight += item.Weight;
+
                 stack.Push(excludeNode);
 
-                if (node.CurrentWeight + item.Weight <= capacity + 1e-9)
+                if (includeNode.CurrentWeight <= capacity + Tolerance)
                 {
-                    var includeNode = node.Clone();
-                    includeNode.Included[item.OriginalIndex] = true;
-                    includeNode.CurrentValue += item.Value;
-                    includeNode.CurrentWeight += item.Weight;
-                    includeNode.ItemsDecided++;
-                    includeNode.Label = $"{node.Label} -> include {varName}";
                     stack.Push(includeNode);
                 }
                 else
                 {
-                    Console.WriteLine($"Include-branch for {varName} fathomed immediately - exceeds capacity.");
+                    runResult.Nodes.Add(new KnapsackNodeResult
+                    {
+                        Label = $"Sub-problem {nodeCounter}.1: " + $"{includeNode.Label}",
+                        Depth = includeNode.Depth,
+                        CurrentValue = includeNode.CurrentValue,
+                        CurrentWeight = includeNode.CurrentWeight,
+                        UpperBound = includeNode.CurrentValue,
+                        VariableValues = ConvertToVariableValues(includeNode.Included),
+                        Status = $"Fathomed - {variableName} = 1 " + $"would exceed capacity " + $"({includeNode.CurrentWeight:F3} > " + $"{capacity:F3})."
+                    });
                 }
             }
 
-            Console.WriteLine();
             if (bestIncluded != null)
             {
-                Console.WriteLine($"Best candidate: Z = {bestValue:F3}");
-                for (int j = 0; j < n; j++)
-                    Console.WriteLine($"  x{j + 1} = {(bestIncluded[j] ? 1 : 0)}");
+                runResult.Best = new KnapsackResult
+                {
+                    Found = true,
+                    ObjectiveValue = bestValue,
+                    VariableValues = ConvertToVariableValues(bestIncluded),
+                    SourceNodeLabel = bestLabel
+                };
             }
             else
             {
-                Console.WriteLine("No feasible solution found.");
+                runResult.Best = new KnapsackResult
+                {
+                    Found = false
+                };
             }
+
+            return runResult;
         }
-            // Dantzig bound: greedily fill remaining capacity by ratio, taking a
-            // fractional slice of the item that doesn't fully fit - upper bound on
-            // what this branch could reach.
-        
+
+        private static bool IsKnapSackModel(LinearProgram program)
+        {
+            if (program == null) return false;
+
+            if (program.Constraints == null || program.Constraints.Count != 1) return false;
+
+            if (program.Constraints[0].Operator != "<=") return false;
+
+            if (program.VariableTypes == null || program.VariableTypes.Any(type => type != "bin")) return false;
+
+            return true;
+
+        }
+
+
+
+
+
+
+
         private static double ComputeBound(List<Item> sorted, Node node, double capacity)
         {
             double remainingCapacity = capacity - node.CurrentWeight;
             double bound = node.CurrentValue;
 
+            if (remainingCapacity < -Tolerance) return double.NegativeInfinity;
+
+
             for (int i = node.ItemsDecided; i < sorted.Count; i++)
             {
-                var item = sorted[i];
-                if (item.Weight <= remainingCapacity)
+                Item item = sorted[i];
+                if (item.Weight <= 0)
+                {
+                    if (item.Value > 0)
+                        bound += item.Value;
+                    continue;
+                }
+                if (item.Weight <= remainingCapacity + Tolerance)
                 {
                     bound += item.Value;
                     remainingCapacity -= item.Weight;
                 }
                 else
                 {
-                    if (item.Weight > 0)
-                        bound += item.Ratio * remainingCapacity;
+
+                    bound += item.Ratio * Math.Max(0, remainingCapacity);
                     break;
                 }
             }
 
             return bound;
+        }
+
+        //convert bool[] to x1,x2 ect
+
+        private static double[] ConvertToVariableValues(bool[] included)
+        {
+            var values = new double[included.Length];
+            for (int i = 0; i < included.Length; i++)
+            {
+                values[i] = included[i] ? 1.0 : 0.0;
+            }
+            return values;
         }
     }
 }

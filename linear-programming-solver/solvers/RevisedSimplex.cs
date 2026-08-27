@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using LinearProgrammingSolver.Models;
+using LinearProgrammingSolver.Solvers;
 
 namespace LinearProgrammingSolver.Solvers
 {
@@ -9,7 +10,7 @@ namespace LinearProgrammingSolver.Solvers
         private const int MaxIterations = 1000;
 
         // Entry point for the revised simplex solver. Assumes tableau is in a form with feasible RHS.
-        public static void revisedSimplexSolver(Tableau tableau)
+        public static SimplexResult revisedSimplexSolver(Tableau tableau)
         {
             int numRows = tableau.Matrix.GetLength(0);
             int numCols = tableau.Matrix.GetLength(1);
@@ -20,10 +21,15 @@ namespace LinearProgrammingSolver.Solvers
             {
                 if (tableau.Matrix[i, rhsColumn] < 0)
                 {
-                    Console.WriteLine("Tableau has negative RHS values. Use dual simplex instead.");
-                    return;
+                    throw new InvalidOperationException("Tableau has negative RHS values. Use dual simplex instead.");
+
                 }
             }
+
+            // Capture original objective coefficients ONCE, before any pivoting happens
+            double[] originalC = new double[rhsColumn];
+            for (int j = 0; j < rhsColumn; j++)
+                originalC[j] = -tableau.Matrix[0, j];
 
             // Initialize basis to slack columns (like SimplexSolver)
             var basis = new int[tableau.NumConstraintRows];
@@ -45,13 +51,10 @@ namespace LinearProgrammingSolver.Solvers
                 // Compute reduced costs and find entering variable
                 int rhsCols = rhsColumn;
                 double[] reducedCosts = new double[rhsCols];
-                double mostNegative = 0;
+                double mostPositive = 0;
                 int enteringCol = -1;
 
-                // c_j values: original objective coefficients are -matrix[0,j]
-                double[] c = new double[rhsCols];
-                for (int j = 0; j < rhsCols; j++)
-                    c[j] = -tableau.Matrix[0, j];
+                double[] c = originalC;
 
                 // c_B
                 double[] cB = new double[basis.Length];
@@ -66,9 +69,9 @@ namespace LinearProgrammingSolver.Solvers
                     var aj = GetColumn(tableau.Matrix, j, startRow: 1);
                     var term = Dot(pi, aj);
                     reducedCosts[j] = c[j] - term;
-                    if (reducedCosts[j] < mostNegative)
+                    if (reducedCosts[j] > mostPositive)
                     {
-                        mostNegative = reducedCosts[j];
+                        mostPositive = reducedCosts[j];
                         enteringCol = j;
                     }
                 }
@@ -76,8 +79,8 @@ namespace LinearProgrammingSolver.Solvers
                 if (enteringCol == -1)
                 {
                     // Optimal
-                    PrintSolution(tableau, basis, rhsColumn);
-                    return;
+                    return SolutionBuilder.BuildResult(tableau, basis, rhsColumn);
+
                 }
 
                 // Compute direction d = B^{-1} * a_enter
@@ -102,8 +105,7 @@ namespace LinearProgrammingSolver.Solvers
 
                 if (leavingIndex == -1)
                 {
-                    Console.WriteLine("LP is unbounded (revised simplex).");
-                    return;
+                    throw new InvalidOperationException("LP is unbounded (revised simplex).");
                 }
 
                 int pivotRowInTableau = leavingIndex + 1; // tableau rows start at 1 for constraints
@@ -112,7 +114,7 @@ namespace LinearProgrammingSolver.Solvers
                 tableau.RecordIteration();
             }
 
-            Console.WriteLine($"Revised simplex did not converge after {MaxIterations} iterations.");
+            throw new InvalidOperationException($"Revised simplex did not converge after {MaxIterations} iterations.");
         }
 
         // Helper: extract RHS vector (excluding objective row)
@@ -271,21 +273,6 @@ namespace LinearProgrammingSolver.Solvers
             }
         }
 
-        private static void PrintSolution(Tableau tableau, int[] basis, int rhsColumn)
-        {
-            var values = new double[tableau.NumVariables];
 
-            for (int i = 0; i < basis.Length; i++)
-            {
-                if (basis[i] < tableau.NumVariables)
-                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
-            }
-
-            Console.WriteLine("Optimal solution found:");
-            for (int j = 0; j < tableau.NumVariables; j++)
-                Console.WriteLine($"  x{j + 1} = {values[j]}");
-
-            Console.WriteLine($"  Z = {tableau.Matrix[0, rhsColumn]}");
-        }
     }
 }

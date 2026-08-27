@@ -17,10 +17,7 @@ namespace LinearProgrammingSolver.Solvers
 
             foreach (var c in source.Constraints)
             {
-                clone.Constraints.Add(new Constraint(
-                    (double[])c.Coefficients.Clone(),
-                    c.Operator,
-                    c.RightHandSide));
+                clone.Constraints.Add(new Constraint((double[])c.Coefficients.Clone(), c.Operator, c.RightHandSide));
             }
 
             return clone;

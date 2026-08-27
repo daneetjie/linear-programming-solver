@@ -26,16 +26,38 @@ namespace LinearProgrammingSolver.Solvers
         public string SourceNodeLabel { get; set; }
     }
 
+    //one entry per sub-problem explored
+
+    public class BranchAndBoundNodeResult
+    {
+        public string Label { get; set; }
+        public int Depth { get; set; }
+        public Tableau Tableau { get; set; }
+        public string Status { get; set; }
+        public bool IsNewBest { get; set; }
+    }
+
+    //put all sub-problems togeth + best candidate
+    public class BranchAndBoundRunResult
+    {
+        public List<BranchAndBoundNodeResult> Nodes { get; set; } = new();
+
+        public BranchAndBoundResult Best { get; set; }
+    }
+
+
+
+
     public static class BranchAndBoundSolver
     {
-        public static BranchAndBoundResult Solve(LinearProgram rootProgram)
+        public static BranchAndBoundRunResult Solve(LinearProgram rootProgram)
         {
             // Stack = depth-first with backtracking built in - fathoming a
             // branch just means popping the next one off the stack.
 
             var stack = new Stack<BranchAndBoundNode>();
             stack.Push(new BranchAndBoundNode(rootProgram, 0, "Root"));
-
+            var runResult = new BranchAndBoundRunResult();
             BranchAndBoundResult best = null;
             int nodeCounter = 0;
 
@@ -44,24 +66,31 @@ namespace LinearProgrammingSolver.Solvers
                 var node = stack.Pop();
                 nodeCounter++;
 
-                Console.WriteLine();
-                Console.WriteLine($"--- Sub-problem {nodeCounter}: {node.Label} (depth {node.Depth}) ---");
 
                 var tableau = new Tableau(node.Program);
-                Solve(tableau); // prints canonical form + all iterations itself
+                Solve(tableau);
 
                 var result = SolutionReader.ExtractSolution(tableau);
 
+                var nodeResult = new BranchAndBoundNodeResult
+                {
+                    Label = $"Sub-problem {nodeCounter}: {node.Label}",
+                    Depth = node.Depth,
+                    Tableau = tableau
+                };
+
                 if (result.Status == LpStatus.Unbounded)
                 {
-                    Console.WriteLine($"Sub-problem {nodeCounter} fathomed - relaxation is unbounded.");
+                    nodeResult.Status = "fathomed - relaxation is unbounded.";
+                    runResult.Nodes.Add(nodeResult);
                     continue;
                 }
 
                 // Fathom by bound: relaxation can't beat the current best.
                 if (best != null && result.ObjectiveValue <= best.ObjectiveValue + 1e-9)
                 {
-                    Console.WriteLine($"Sub-problem {nodeCounter} fathomed - bound {result.ObjectiveValue:F3} cannot beat current best {best.ObjectiveValue:F3}.");
+                    nodeResult.Status = $"fathomed - bound {result.ObjectiveValue:F3} cannot beat current best {best.ObjectiveValue:F3}.";
+                    runResult.Nodes.Add(nodeResult);
                     continue;
                 }
 
@@ -69,7 +98,7 @@ namespace LinearProgrammingSolver.Solvers
 
                 if (fractionalIndex == -1)
                 {
-                    Console.WriteLine($"Sub-problem {nodeCounter} is integer-feasible - candidate found, Z = {result.ObjectiveValue:F3}");
+                    nodeResult.Status = $"Integer-feasible - candidate found, Z = {result.ObjectiveValue:F3}";
 
                     if (best == null || result.ObjectiveValue > best.ObjectiveValue)
                     {
@@ -80,9 +109,9 @@ namespace LinearProgrammingSolver.Solvers
                             VariableValues = result.VariableValues,
                             SourceNodeLabel = node.Label
                         };
-                        Console.WriteLine($"New best candidate: Z = {best.ObjectiveValue:F3}");
+                        nodeResult.IsNewBest = true;
                     }
-
+                    runResult.Nodes.Add(nodeResult);
                     continue; // fathomed: integer-feasible leaf
                 }
 
@@ -90,7 +119,7 @@ namespace LinearProgrammingSolver.Solvers
                 double floorBound = Math.Floor(fractionalValue);
                 double ceilBound = Math.Ceiling(fractionalValue);
 
-                Console.WriteLine($"Sub-problem {nodeCounter} fractional on x{fractionalIndex + 1} = {fractionalValue:F3} - branching.");
+                nodeResult.Status = $"Fractional on x{fractionalIndex + 1} = {fractionalValue:F3} - branching.";
 
                 var childLow = LinearProgramCloner.WithExtraBound(node.Program, fractionalIndex, "<=", floorBound);
                 var childHigh = LinearProgramCloner.WithExtraBound(node.Program, fractionalIndex, ">=", ceilBound);
@@ -103,19 +132,9 @@ namespace LinearProgrammingSolver.Solvers
                     $"{node.Label} + x{fractionalIndex + 1} <= {floorBound:F0}"));
             }
 
-            Console.WriteLine();
-            if (best != null)
-            {
-                Console.WriteLine($"Best candidate found at [{best.SourceNodeLabel}]: Z = {best.ObjectiveValue:F3}");
-                for (int j = 0; j < best.VariableValues.Length; j++)
-                    Console.WriteLine($"  x{j + 1} = {best.VariableValues[j]:F3}");
-            }
-            else
-            {
-                Console.WriteLine("No integer-feasible solution found.");
-            }
+            runResult.Best = best ?? new BranchAndBoundResult { Found = false };
 
-            return best ?? new BranchAndBoundResult { Found = false };
+            return runResult;
         }
 
 
