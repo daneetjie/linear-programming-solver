@@ -338,7 +338,8 @@ namespace LinearProgrammingSolver.Solvers
                     double coeff = matrix[pivotRow][col];
                     if (coeff >= -Tolerance) continue;
 
-                    double ratio = matrix[0][col] / coeff;
+                    // Dual ratio test: min |z_j - c_j| / |a_rj| over the columns with a_rj < 0.
+                    double ratio = Math.Abs(matrix[0][col]) / Math.Abs(coeff);
                     if (ratio < bestRatio)
                     {
                         bestRatio = ratio;

@@ -71,8 +71,8 @@ namespace LinearProgrammingSolver.Solvers
                     continue; // need negative coefficient to increase RHS toward non-negative
 
                 double cj = matrix[0, j];
-                // ratio = cj / a  (a < 0)
-                double ratio = cj / a;
+                // Dual ratio test: min |z_j - c_j| / |a_rj| over the columns with a_rj < 0.
+                double ratio = Math.Abs(cj) / Math.Abs(a);
                 if (ratio < bestRatio)
                 {
                     bestRatio = ratio;
