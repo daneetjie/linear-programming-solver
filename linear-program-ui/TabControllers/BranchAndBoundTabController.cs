@@ -3,11 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using LinearProgrammingSolver.Models;
-using linear_programming_solver.UI;
 using System.Windows.Forms;
 using System.IO;
 
-namespace linear_program_ui
+namespace linear_program_ui.TabControllers
 {
     internal class BranchAndBoundTabController
     {

@@ -1,13 +1,12 @@
 using LinearProgrammingSolver.Models;
 using LinearProgrammingSolver.Solvers;
-using linear_programming_solver.UI;
 using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace linear_program_ui
+namespace linear_program_ui.TabControllers
 {
     public class SensitivityTab
     {

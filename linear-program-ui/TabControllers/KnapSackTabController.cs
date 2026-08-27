@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace linear_program_ui
+namespace linear_program_ui.TabControllers
 {
     internal class KnapSackTabController
     {
@@ -478,7 +478,7 @@ namespace linear_program_ui
             }
 
 
-            //best slution
+            //best solution
 
             sb.AppendLine(
                 "=== BEST CANDIDATE ===");

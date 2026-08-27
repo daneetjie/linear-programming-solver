@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
-using linear_programming_solver.UI;
 using LinearProgrammingSolver.Models;
 using LinearProgrammingSolver.Solvers;
 
-namespace linear_program_ui
+namespace linear_program_ui.TabControllers
 {
     internal class CuttingPlaneTabController
     {

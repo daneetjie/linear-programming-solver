@@ -1,11 +1,10 @@
-﻿using linear_programming_solver.UI;
-using LinearProgrammingSolver.Models;
+﻿using LinearProgrammingSolver.Models;
 using LinearProgrammingSolver.Solvers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace linear_program_ui
+namespace linear_program_ui.TabControllers
 {
     public class SimplexTabController
     {
@@ -51,7 +50,7 @@ namespace linear_program_ui
             // Header style
             dgv.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
             {
-                BackColor = Color.FromArgb(70, 130, 180),   // SteelBlue
+                BackColor = Color.FromArgb(70, 130, 180),   
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 Alignment = DataGridViewContentAlignment.MiddleCenter

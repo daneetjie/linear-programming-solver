@@ -41,11 +41,11 @@ namespace LinearProgrammingSolver.Solvers
             throw new InvalidOperationException($"Simplex did not converge after {MaxIterations} iterations.");
         }
 
+       
 
+        
 
-
-
-
+        
 
 
 

@@ -1,4 +1,4 @@
-using linear_programming_solver.UI;
+using linear_program_ui.TabControllers;
 using LinearProgrammingSolver.Controllers;
 using LinearProgrammingSolver.Models;
 using LinearProgrammingSolver.Solvers;

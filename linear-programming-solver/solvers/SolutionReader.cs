@@ -75,9 +75,7 @@ namespace LinearProgrammingSolver.Solvers
 
                 // A basic variable's column is a unit column with the single
                 // 1 in one of the constraint rows (row 0 is the objective row).
-                values[j] = (isBasic && oneCount == 1 && basicRow > 0)
-                    ? tableau.Matrix[basicRow, rhsColumn]
-                    : 0.0;
+                values[j] = (isBasic && oneCount == 1 && basicRow > 0) ? tableau.Matrix[basicRow, rhsColumn]: 0.0;
             }
 
             return new LpResult

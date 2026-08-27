@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 using LinearProgrammingSolver.Models;
 
-namespace linear_programming_solver.UI
+namespace linear_program_ui.TabControllers
 {
     public static class TableDisplay
     {

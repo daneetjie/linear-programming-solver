@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             tp_branchBoundKnap = new TabPage();
             btnSaveKnapSack = new Button();
             label8 = new Label();
@@ -118,10 +119,10 @@
             tp_branchBoundKnap.Controls.Add(btn_LoadKnapSack);
             tp_branchBoundKnap.Controls.Add(dgvBestCandidateKnapsack);
             tp_branchBoundKnap.Controls.Add(iterationsPanelKnapSack);
-            tp_branchBoundKnap.Location = new Point(4, 24);
+            tp_branchBoundKnap.Location = new Point(4, 36);
             tp_branchBoundKnap.Name = "tp_branchBoundKnap";
             tp_branchBoundKnap.Padding = new Padding(3);
-            tp_branchBoundKnap.Size = new Size(1491, 809);
+            tp_branchBoundKnap.Size = new Size(1491, 797);
             tp_branchBoundKnap.TabIndex = 4;
             tp_branchBoundKnap.Text = "Branch And Bound Knapsack";
             tp_branchBoundKnap.UseVisualStyleBackColor = true;
@@ -145,13 +146,13 @@
             // 
             label8.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label8.ForeColor = Color.FromArgb(70, 130, 180);
             label8.Location = new Point(6, 16);
             label8.Name = "label8";
-            label8.Size = new Size(90, 15);
+            label8.Size = new Size(109, 19);
             label8.TabIndex = 40;
             label8.Text = "Best Candidate";
-            label8.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label8.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_SolveKnapSack
             // 
@@ -173,15 +174,14 @@
             lblFileLoadedKnapSack.AccessibleName = "lblFileLoadedKnapSack";
             lblFileLoadedKnapSack.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblFileLoadedKnapSack.AutoSize = true;
-            lblFileLoadedKnapSack.Font = new Font("Segoe UI Semibold", 8F, FontStyle.Bold | FontStyle.Italic);
+            lblFileLoadedKnapSack.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblFileLoadedKnapSack.ForeColor = Color.FromArgb(70, 130, 180);
             lblFileLoadedKnapSack.Location = new Point(9, 749);
             lblFileLoadedKnapSack.Name = "lblFileLoadedKnapSack";
-            lblFileLoadedKnapSack.Size = new Size(36, 13);
+            lblFileLoadedKnapSack.Size = new Size(50, 19);
             lblFileLoadedKnapSack.TabIndex = 38;
             lblFileLoadedKnapSack.Text = "label1";
             lblFileLoadedKnapSack.Visible = false;
-            lblFileLoadedKnapSack.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblFileLoadedKnapSack.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_LoadKnapSack
             // 
@@ -201,7 +201,6 @@
             // dgvBestCandidateKnapsack
             // 
             dgvBestCandidateKnapsack.AccessibleName = "dgvBestCandidateKnapsack";
-            dgvBestCandidateKnapsack.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             dgvBestCandidateKnapsack.BackgroundColor = SystemColors.ActiveCaption;
             dgvBestCandidateKnapsack.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvBestCandidateKnapsack.Location = new Point(8, 34);
@@ -233,10 +232,10 @@
             tp_cuttingPlane.Controls.Add(btn_LoadCuttingPlane);
             tp_cuttingPlane.Controls.Add(dgvBestCandidateCuttingPlane);
             tp_cuttingPlane.Controls.Add(iterationsPanelCuttingPlane);
-            tp_cuttingPlane.Location = new Point(4, 24);
+            tp_cuttingPlane.Location = new Point(4, 36);
             tp_cuttingPlane.Name = "tp_cuttingPlane";
             tp_cuttingPlane.Padding = new Padding(3);
-            tp_cuttingPlane.Size = new Size(1491, 809);
+            tp_cuttingPlane.Size = new Size(1491, 797);
             tp_cuttingPlane.TabIndex = 3;
             tp_cuttingPlane.Text = "Cutting Plane";
             tp_cuttingPlane.UseVisualStyleBackColor = true;
@@ -260,13 +259,13 @@
             // 
             label7.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label7.ForeColor = Color.FromArgb(70, 130, 180);
             label7.Location = new Point(6, 16);
             label7.Name = "label7";
-            label7.Size = new Size(90, 15);
+            label7.Size = new Size(109, 19);
             label7.TabIndex = 33;
             label7.Text = "Best Candidate";
-            label7.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label7.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_SolveCuttingPlane
             // 
@@ -288,15 +287,14 @@
             lblFileLoadedCuttingPlane.AccessibleName = "lblFileLoadedCuttingPlane";
             lblFileLoadedCuttingPlane.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblFileLoadedCuttingPlane.AutoSize = true;
-            lblFileLoadedCuttingPlane.Font = new Font("Segoe UI Semibold", 8F, FontStyle.Bold | FontStyle.Italic);
+            lblFileLoadedCuttingPlane.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblFileLoadedCuttingPlane.ForeColor = Color.FromArgb(70, 130, 180);
             lblFileLoadedCuttingPlane.Location = new Point(9, 749);
             lblFileLoadedCuttingPlane.Name = "lblFileLoadedCuttingPlane";
-            lblFileLoadedCuttingPlane.Size = new Size(36, 13);
+            lblFileLoadedCuttingPlane.Size = new Size(50, 19);
             lblFileLoadedCuttingPlane.TabIndex = 31;
             lblFileLoadedCuttingPlane.Text = "label1";
             lblFileLoadedCuttingPlane.Visible = false;
-            lblFileLoadedCuttingPlane.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblFileLoadedCuttingPlane.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_LoadCuttingPlane
             // 
@@ -316,7 +314,6 @@
             // dgvBestCandidateCuttingPlane
             // 
             dgvBestCandidateCuttingPlane.AccessibleName = "dgvBestCandidateCuttingPlane";
-            dgvBestCandidateCuttingPlane.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             dgvBestCandidateCuttingPlane.BackgroundColor = SystemColors.ActiveCaption;
             dgvBestCandidateCuttingPlane.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvBestCandidateCuttingPlane.Location = new Point(8, 34);
@@ -348,11 +345,11 @@
             tp_branchBound.Controls.Add(btn_LoadBranchBound);
             tp_branchBound.Controls.Add(dgvBestCandidateBranchBound);
             tp_branchBound.Controls.Add(iterationsPanelBranchBound);
-            tp_branchBound.Location = new Point(4, 24);
+            tp_branchBound.Location = new Point(4, 36);
             tp_branchBound.Name = "tp_branchBound";
             tp_branchBound.Padding = new Padding(3);
             tp_branchBound.RightToLeft = RightToLeft.No;
-            tp_branchBound.Size = new Size(1491, 809);
+            tp_branchBound.Size = new Size(1491, 797);
             tp_branchBound.TabIndex = 2;
             tp_branchBound.Text = "Branch And Bound";
             tp_branchBound.UseVisualStyleBackColor = true;
@@ -376,13 +373,13 @@
             // 
             label5.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label5.ForeColor = Color.FromArgb(70, 130, 180);
             label5.Location = new Point(6, 16);
             label5.Name = "label5";
-            label5.Size = new Size(90, 15);
+            label5.Size = new Size(109, 19);
             label5.TabIndex = 26;
             label5.Text = "Best Candidate";
-            label5.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label5.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_SolveBranchBound
             // 
@@ -404,15 +401,14 @@
             lblFileLoadedBranchBound.AccessibleName = "lblFileLoadedBranchBound";
             lblFileLoadedBranchBound.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblFileLoadedBranchBound.AutoSize = true;
-            lblFileLoadedBranchBound.Font = new Font("Segoe UI Semibold", 8F, FontStyle.Bold | FontStyle.Italic);
+            lblFileLoadedBranchBound.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblFileLoadedBranchBound.ForeColor = Color.FromArgb(70, 130, 180);
             lblFileLoadedBranchBound.Location = new Point(9, 749);
             lblFileLoadedBranchBound.Name = "lblFileLoadedBranchBound";
-            lblFileLoadedBranchBound.Size = new Size(36, 13);
+            lblFileLoadedBranchBound.Size = new Size(50, 19);
             lblFileLoadedBranchBound.TabIndex = 24;
             lblFileLoadedBranchBound.Text = "label1";
             lblFileLoadedBranchBound.Visible = false;
-            lblFileLoadedBranchBound.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblFileLoadedBranchBound.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_LoadBranchBound
             // 
@@ -432,7 +428,6 @@
             // dgvBestCandidateBranchBound
             // 
             dgvBestCandidateBranchBound.AccessibleName = "dgvBestCandidateBranchBound";
-            dgvBestCandidateBranchBound.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             dgvBestCandidateBranchBound.BackgroundColor = SystemColors.ActiveCaption;
             dgvBestCandidateBranchBound.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvBestCandidateBranchBound.Location = new Point(8, 34);
@@ -449,10 +444,10 @@
             iterationsPanelBranchBound.FlowDirection = FlowDirection.TopDown;
             iterationsPanelBranchBound.Location = new Point(585, 7);
             iterationsPanelBranchBound.Name = "iterationsPanelBranchBound";
+            iterationsPanelBranchBound.Padding = new Padding(10);
             iterationsPanelBranchBound.Size = new Size(899, 783);
             iterationsPanelBranchBound.TabIndex = 20;
             iterationsPanelBranchBound.WrapContents = false;
-            iterationsPanelBranchBound.Padding = new Padding(10);
             // 
             // tp_revisedPrimal
             // 
@@ -467,10 +462,10 @@
             tp_revisedPrimal.Controls.Add(label6);
             tp_revisedPrimal.Controls.Add(iterationsPanelPrimalRevised);
             tp_revisedPrimal.Controls.Add(canonicalDgvPrimalRevised);
-            tp_revisedPrimal.Location = new Point(4, 24);
+            tp_revisedPrimal.Location = new Point(4, 36);
             tp_revisedPrimal.Name = "tp_revisedPrimal";
             tp_revisedPrimal.Padding = new Padding(3);
-            tp_revisedPrimal.Size = new Size(1491, 809);
+            tp_revisedPrimal.Size = new Size(1491, 797);
             tp_revisedPrimal.TabIndex = 1;
             tp_revisedPrimal.Text = "Revised Primal Simplex";
             // 
@@ -493,13 +488,13 @@
             // 
             label4.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label4.ForeColor = Color.FromArgb(70, 130, 180);
             label4.Location = new Point(7, 528);
             label4.Name = "label4";
-            label4.Size = new Size(73, 15);
+            label4.Size = new Size(90, 19);
             label4.TabIndex = 17;
             label4.Text = "Final Values:";
-            label4.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label4.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_SolveRevised
             // 
@@ -521,15 +516,14 @@
             lblFileLoadedRevised.AccessibleName = "lblFileLoadedRevised";
             lblFileLoadedRevised.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblFileLoadedRevised.AutoSize = true;
-            lblFileLoadedRevised.Font = new Font("Segoe UI Semibold", 8F, FontStyle.Bold | FontStyle.Italic);
+            lblFileLoadedRevised.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblFileLoadedRevised.ForeColor = Color.FromArgb(70, 130, 180);
             lblFileLoadedRevised.Location = new Point(9, 749);
             lblFileLoadedRevised.Name = "lblFileLoadedRevised";
-            lblFileLoadedRevised.Size = new Size(36, 13);
+            lblFileLoadedRevised.Size = new Size(50, 19);
             lblFileLoadedRevised.TabIndex = 15;
             lblFileLoadedRevised.Text = "label1";
             lblFileLoadedRevised.Visible = false;
-            lblFileLoadedRevised.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblFileLoadedRevised.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_LoadRevised
             // 
@@ -560,13 +554,13 @@
             // label6
             // 
             label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label6.ForeColor = Color.FromArgb(70, 130, 180);
             label6.Location = new Point(9, 7);
             label6.Name = "label6";
-            label6.Size = new Size(94, 15);
+            label6.Size = new Size(117, 19);
             label6.TabIndex = 12;
             label6.Text = "Canonical Form:";
-            label6.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label6.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // iterationsPanelPrimalRevised
             // 
@@ -605,10 +599,10 @@
             tp_primalSimplex.Controls.Add(label1);
             tp_primalSimplex.Controls.Add(iterationsPanelPrimal);
             tp_primalSimplex.Controls.Add(canonicalDgvPrimal);
-            tp_primalSimplex.Location = new Point(4, 24);
+            tp_primalSimplex.Location = new Point(4, 36);
             tp_primalSimplex.Name = "tp_primalSimplex";
             tp_primalSimplex.Padding = new Padding(3);
-            tp_primalSimplex.Size = new Size(1491, 809);
+            tp_primalSimplex.Size = new Size(1491, 797);
             tp_primalSimplex.TabIndex = 0;
             tp_primalSimplex.Text = "Primal Simplex";
             // 
@@ -631,13 +625,13 @@
             // 
             label3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label3.ForeColor = Color.FromArgb(70, 130, 180);
             label3.Location = new Point(6, 527);
             label3.Name = "label3";
-            label3.Size = new Size(73, 15);
+            label3.Size = new Size(90, 19);
             label3.TabIndex = 7;
             label3.Text = "Final Values:";
-            label3.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label3.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_Solve
             // 
@@ -659,15 +653,14 @@
             lblFileLoaded.AccessibleName = "lblFileLoaded";
             lblFileLoaded.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblFileLoaded.AutoSize = true;
-            lblFileLoaded.Font = new Font("Segoe UI Semibold", 8F, FontStyle.Bold | FontStyle.Italic);
+            lblFileLoaded.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblFileLoaded.ForeColor = Color.FromArgb(70, 130, 180);
             lblFileLoaded.Location = new Point(8, 748);
             lblFileLoaded.Name = "lblFileLoaded";
-            lblFileLoaded.Size = new Size(36, 13);
+            lblFileLoaded.Size = new Size(50, 19);
             lblFileLoaded.TabIndex = 5;
             lblFileLoaded.Text = "label1";
             lblFileLoaded.Visible = false;
-            lblFileLoaded.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblFileLoaded.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btn_Load
             // 
@@ -697,13 +690,13 @@
             // label1
             // 
             label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label1.ForeColor = Color.FromArgb(70, 130, 180);
             label1.Location = new Point(8, 6);
             label1.Name = "label1";
-            label1.Size = new Size(94, 15);
+            label1.Size = new Size(117, 19);
             label1.TabIndex = 2;
             label1.Text = "Canonical Form:";
-            label1.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            label1.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // iterationsPanelPrimal
             // 
@@ -739,14 +732,14 @@
             TabControl.Controls.Add(tp_cuttingPlane);
             TabControl.Controls.Add(tp_branchBoundKnap);
             TabControl.Controls.Add(tp_sensitivity);
-            TabControl.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
+            TabControl.Font = new Font("Segoe UI", 9.5F);
+            TabControl.ItemSize = new Size(140, 32);
             TabControl.Location = new Point(0, 0);
             TabControl.Name = "TabControl";
             TabControl.SelectedIndex = 0;
             TabControl.Size = new Size(1499, 837);
-            TabControl.TabIndex = 3;
-            TabControl.ItemSize = new Size(140, 32);   
             TabControl.SizeMode = TabSizeMode.Fixed;
+            TabControl.TabIndex = 3;
             // 
             // tp_sensitivity
             // 
@@ -767,37 +760,35 @@
             tp_sensitivity.Controls.Add(lblTarget);
             tp_sensitivity.Controls.Add(cmboSensitivity);
             tp_sensitivity.Controls.Add(lblOperation);
-            tp_sensitivity.Location = new Point(4, 24);
+            tp_sensitivity.Location = new Point(4, 36);
             tp_sensitivity.Name = "tp_sensitivity";
             tp_sensitivity.Padding = new Padding(3);
-            tp_sensitivity.Size = new Size(1491, 809);
+            tp_sensitivity.Size = new Size(1491, 797);
             tp_sensitivity.TabIndex = 5;
             tp_sensitivity.Text = "Sensitivity Analysis";
             // 
             // panelSensitivityIterations
             // 
             panelSensitivityIterations.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
-            panelSensitivityIterations.BackColor = Color.FromArgb(240, 248, 255); 
+            panelSensitivityIterations.BackColor = Color.FromArgb(240, 248, 255);
             panelSensitivityIterations.FlowDirection = FlowDirection.TopDown;
             panelSensitivityIterations.Location = new Point(758, 30);
             panelSensitivityIterations.Name = "panelSensitivityIterations";
             panelSensitivityIterations.Padding = new Padding(10);
             panelSensitivityIterations.Size = new Size(727, 771);
             panelSensitivityIterations.TabIndex = 25;
-            iterationsPanelPrimalRevised.WrapContents = false;
             // 
             // lblIterationHistory
             // 
             lblIterationHistory.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblIterationHistory.AutoSize = true;
-            lblIterationHistory.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblIterationHistory.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblIterationHistory.ForeColor = Color.FromArgb(70, 130, 180);
             lblIterationHistory.Location = new Point(758, 8);
             lblIterationHistory.Name = "lblIterationHistory";
-            lblIterationHistory.Size = new Size(102, 15);
+            lblIterationHistory.Size = new Size(124, 19);
             lblIterationHistory.TabIndex = 26;
             lblIterationHistory.Text = "Iteration History:";
-            lblIterationHistory.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblIterationHistory.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // btnSaveAnalysis
             // 
@@ -815,14 +806,13 @@
             // 
             lblOptimalTableau.Anchor = AnchorStyles.Top;
             lblOptimalTableau.AutoSize = true;
-            lblOptimalTableau.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblOptimalTableau.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblOptimalTableau.ForeColor = Color.FromArgb(70, 130, 180);
             lblOptimalTableau.Location = new Point(355, 355);
             lblOptimalTableau.Name = "lblOptimalTableau";
-            lblOptimalTableau.Size = new Size(98, 15);
+            lblOptimalTableau.Size = new Size(121, 19);
             lblOptimalTableau.TabIndex = 23;
             lblOptimalTableau.Text = "Optimal tableau:";
-            lblOptimalTableau.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblOptimalTableau.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // dgvSensitivityTableau
             // 
@@ -851,14 +841,13 @@
             // 
             lblResults.Anchor = AnchorStyles.Top;
             lblResults.AutoSize = true;
-            lblResults.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblResults.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblResults.ForeColor = Color.FromArgb(70, 130, 180);
             lblResults.Location = new Point(355, 8);
             lblResults.Name = "lblResults";
-            lblResults.Size = new Size(50, 15);
+            lblResults.Size = new Size(59, 19);
             lblResults.TabIndex = 28;
             lblResults.Text = "Results:";
-            lblResults.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblResults.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // dgvResults
             // 
@@ -875,7 +864,7 @@
             numNewValue.BackColor = SystemColors.ActiveCaption;
             numNewValue.Location = new Point(6, 156);
             numNewValue.Name = "numNewValue";
-            numNewValue.Size = new Size(331, 23);
+            numNewValue.Size = new Size(331, 24);
             numNewValue.TabIndex = 19;
             numNewValue.Visible = false;
             // 
@@ -884,21 +873,21 @@
             txtNewData.BackColor = SystemColors.ActiveCaption;
             txtNewData.Location = new Point(6, 156);
             txtNewData.Name = "txtNewData";
-            txtNewData.Size = new Size(331, 23);
+            txtNewData.Size = new Size(331, 24);
             txtNewData.TabIndex = 18;
             txtNewData.Visible = false;
             // 
             // lblExtraInput
             // 
             lblExtraInput.AutoSize = true;
+            lblExtraInput.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblExtraInput.ForeColor = Color.FromArgb(70, 130, 180);
             lblExtraInput.Location = new Point(6, 138);
             lblExtraInput.Name = "lblExtraInput";
-            lblExtraInput.Size = new Size(98, 15);
+            lblExtraInput.Size = new Size(121, 19);
             lblExtraInput.TabIndex = 29;
             lblExtraInput.Text = "Additional input:";
             lblExtraInput.Visible = false;
-            lblExtraInput.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblExtraInput.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // cmbTarget
             // 
@@ -906,23 +895,22 @@
             cmbTarget.FormattingEnabled = true;
             cmbTarget.Location = new Point(6, 78);
             cmbTarget.Name = "cmbTarget";
-            cmbTarget.Size = new Size(331, 23);
+            cmbTarget.Size = new Size(331, 25);
             cmbTarget.TabIndex = 17;
             cmbTarget.Visible = false;
             // 
             // lblTarget
             // 
             lblTarget.AutoSize = true;
+            lblTarget.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblTarget.ForeColor = Color.FromArgb(70, 130, 180);
             lblTarget.Location = new Point(6, 60);
             lblTarget.Name = "lblTarget";
-            lblTarget.Size = new Size(46, 15);
+            lblTarget.Size = new Size(56, 19);
             lblTarget.TabIndex = 30;
             lblTarget.Text = "Target:";
             lblTarget.Visible = false;
-            lblTarget.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblTarget.ForeColor = Color.FromArgb(70, 130, 180);
             // 
-
             // cmboSensitivity
             // 
             cmboSensitivity.AccessibleName = "cmboSensitivity";
@@ -931,7 +919,7 @@
             cmboSensitivity.Items.AddRange(new object[] { "Range of selected non-basic variable", "Change selected non-basic variable", "Range of selected basic variable", "Change selected basic variable", "Range of selected constraint rhs value", "Change selected constraint rhs value", "Range of selected variable in a non-basic variable column", "Change selected variable in a non-basic variable column", "Add new activity to optimal solution", "Add new constraint to optimal solution", "Display shadow prices", "Apply duality", "Solve Dual Programming model", "Verify whether programming model has strong/weak duality" });
             cmboSensitivity.Location = new Point(6, 26);
             cmboSensitivity.Name = "cmboSensitivity";
-            cmboSensitivity.Size = new Size(331, 23);
+            cmboSensitivity.Size = new Size(331, 25);
             cmboSensitivity.TabIndex = 16;
             cmboSensitivity.Text = "Select operation";
             cmboSensitivity.SelectedIndexChanged += cmboSensitivity_SelectedIndexChanged;
@@ -939,14 +927,13 @@
             // lblOperation
             // 
             lblOperation.AutoSize = true;
-            lblOperation.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblOperation.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblOperation.ForeColor = Color.FromArgb(70, 130, 180);
             lblOperation.Location = new Point(6, 8);
             lblOperation.Name = "lblOperation";
-            lblOperation.Size = new Size(66, 15);
+            lblOperation.Size = new Size(81, 19);
             lblOperation.TabIndex = 27;
             lblOperation.Text = "Operation:";
-            lblOperation.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            lblOperation.ForeColor = Color.FromArgb(70, 130, 180);
             // 
             // Form1
             // 
@@ -955,6 +942,7 @@
             BackColor = SystemColors.ActiveCaption;
             ClientSize = new Size(1499, 837);
             Controls.Add(TabControl);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "Linear Programming Solver";
             TransparencyKey = Color.LightCyan;
@@ -994,11 +982,6 @@
         private TabPage tp_primalSimplex;
         private TabControl TabControl;
         private Button btn_Solve;
-        private Panel pnl_inputFile;
-        private Button btn_Back;
-        private Button btn_Next;
-        private Label label2;
-        private TabPage tabPage2;
         private Label lblFileLoaded;
         private Button btn_Load;
         private FlowLayoutPanel iterationsPanelPrimal;
