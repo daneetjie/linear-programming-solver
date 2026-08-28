@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="linear-program-ui\linear-program-ui.csproj" />
+  <Project Path="linear-programming-solver\linear-programming-solver.csproj" />
+</Solution>

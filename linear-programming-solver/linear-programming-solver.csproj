@@ -8,9 +8,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-<ItemGroup>
-  <None Update="data\input.txt">
-    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
+  <ItemGroup>
+    <None Update="data\input.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

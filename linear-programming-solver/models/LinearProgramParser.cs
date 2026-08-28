@@ -102,9 +102,6 @@ namespace LinearProgrammingSolver.Controllers
             return (coefficients, operatorToken, rhs);
         }
 
-        private static bool IsValidOperator(string op)
-        {
-            return op == "<=" || op == ">=" || op == "=";
-        }
+       
     }
 }

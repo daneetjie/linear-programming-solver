@@ -8,7 +8,9 @@ namespace LinearProgrammingSolver.Solvers
     {
         private const int MaxIterations = 1000;
 
-        public static void simpleDualSimplexSolver(Tableau tableau)
+        // Returns Optimal once every RHS is non-negative, or Infeasible when a negative row has no
+        // eligible entering column - that row can never be satisfied.
+        public static LpStatus simpleDualSimplexSolver(Tableau tableau)
         {
             int numRows = tableau.Matrix.GetLength(0);
             int numCols = tableau.Matrix.GetLength(1);
@@ -24,18 +26,13 @@ namespace LinearProgrammingSolver.Solvers
                 int pivotRow = SelectPivotRowDual(tableau.Matrix, rhsColumn);
                 if (pivotRow == -1)
                 {
-                    // No negative RHS; primal feasible. Dual-simplex preserves dual feasibility -> optimal
-                    PrintIterations(tableau);
-                    PrintSolution(tableau, basis, rhsColumn);
-                    return;
+                    return LpStatus.Optimal;
                 }
 
                 int pivotColumn = SelectPivotColumnDual(tableau.Matrix, rhsColumn, pivotRow);
                 if (pivotColumn == -1)
                 {
-                    PrintIterations(tableau);
-                    Console.WriteLine("LP is infeasible (dual simplex cannot find entering variable).");
-                    return;
+                    return LpStatus.Infeasible;
                 }
 
                 Pivot(tableau.Matrix, numRows, numCols, pivotRow, pivotColumn);
@@ -43,8 +40,7 @@ namespace LinearProgrammingSolver.Solvers
                 tableau.RecordIteration();
             }
 
-            PrintIterations(tableau);
-            Console.WriteLine($"Dual simplex did not converge after {MaxIterations} iterations.");
+            throw new InvalidOperationException($"Dual simplex did not converge after {MaxIterations} iterations.");
         }
 
         private static int SelectPivotRowDual(double[,] matrix, int rhsColumn)
@@ -77,8 +73,8 @@ namespace LinearProgrammingSolver.Solvers
                     continue; // need negative coefficient to increase RHS toward non-negative
 
                 double cj = matrix[0, j];
-                // ratio = cj / a  (a < 0)
-                double ratio = cj / a;
+                // Dual ratio test: min |z_j - c_j| / |a_rj| over the columns with a_rj < 0.
+                double ratio = Math.Abs(cj) / Math.Abs(a);
                 if (ratio < bestRatio)
                 {
                     bestRatio = ratio;
@@ -110,32 +106,8 @@ namespace LinearProgrammingSolver.Solvers
             }
         }
 
-        private static void PrintIterations(Tableau tableau)
-        {
-            var history = tableau.IterationHistory;
-            for (int i = 0; i < history.Count; i++)
-            {
-                string label = i == 0 ? "Initial Tableau" : $"Iteration {i}";
-                Console.WriteLine($"{label}:");
-                Console.WriteLine(Tableau.Format(tableau.ColumnHeaders, history[i]));
-            }
-        }
+        
 
-        private static void PrintSolution(Tableau tableau, int[] basis, int rhsColumn)
-        {
-            var values = new double[tableau.NumVariables];
-
-            for (int i = 0; i < basis.Length; i++)
-            {
-                if (basis[i] < tableau.NumVariables)
-                    values[basis[i]] = tableau.Matrix[i + 1, rhsColumn];
-            }
-
-            Console.WriteLine("Optimal solution found (primal feasible):");
-            for (int j = 0; j < tableau.NumVariables; j++)
-                Console.WriteLine($"  x{j + 1} = {values[j]}");
-
-            Console.WriteLine($"  Z = {tableau.Matrix[0, rhsColumn]}");
-        }
+        
     }
 }
