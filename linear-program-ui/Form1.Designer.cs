@@ -808,7 +808,7 @@
             lblOptimalTableau.AutoSize = true;
             lblOptimalTableau.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblOptimalTableau.ForeColor = Color.FromArgb(70, 130, 180);
-            lblOptimalTableau.Location = new Point(355, 355);
+            lblOptimalTableau.Location = new Point(293, 353);
             lblOptimalTableau.Name = "lblOptimalTableau";
             lblOptimalTableau.Size = new Size(121, 19);
             lblOptimalTableau.TabIndex = 23;
@@ -819,10 +819,10 @@
             dgvSensitivityTableau.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             dgvSensitivityTableau.BackgroundColor = SystemColors.ActiveCaption;
             dgvSensitivityTableau.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSensitivityTableau.Location = new Point(355, 375);
+            dgvSensitivityTableau.Location = new Point(8, 375);
             dgvSensitivityTableau.Name = "dgvSensitivityTableau";
             dgvSensitivityTableau.ReadOnly = true;
-            dgvSensitivityTableau.Size = new Size(397, 426);
+            dgvSensitivityTableau.Size = new Size(744, 426);
             dgvSensitivityTableau.TabIndex = 22;
             // 
             // btnRunSensitivity

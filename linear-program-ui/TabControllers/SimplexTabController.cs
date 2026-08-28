@@ -11,9 +11,6 @@ namespace linear_program_ui.TabControllers
         public Tableau LastTableau { get; private set; }
         public SimplexResult LastResult { get; private set; }
 
-        // What the tab shows and saves: the relaxation for a continuous model,
-        // the branched integer solution for a 'bin'/'int' one.
-        private Dictionary<string, double>? displayedSolution;
 
         private readonly DataGridView canonicalDgv;
         private readonly FlowLayoutPanel iterationsPanel;
@@ -21,6 +18,7 @@ namespace linear_program_ui.TabControllers
         private readonly Func<Tableau, SimplexResult> solve;
         private readonly string errorTitle;
         private readonly string outputHeader;
+        private Dictionary<string, double>? displayedSolution;
 
         public SimplexTabController(
             DataGridView canonicalDgv,
@@ -81,7 +79,6 @@ namespace linear_program_ui.TabControllers
         {
             var tableau = new Tableau(linearProgram);
             LastTableau = tableau;
-            displayedSolution = null;
             TableDisplay.PopulateTableau(canonicalDgv, tableau, tableau.IterationHistory[0]);
             StyleDataGridView(canonicalDgv);
             canonicalDgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -140,7 +137,7 @@ namespace linear_program_ui.TabControllers
 
             if (result != null)
             {
-                displayedSolution = IntegerSolutionRefiner.Refine(linearProgram, result) ?? result.Solution;
+                displayedSolution = result.Solution;
                 PopulateOptimalSolution(displayedSolution);
             }
         }

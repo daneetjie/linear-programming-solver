@@ -42,13 +42,6 @@ namespace LinearProgrammingSolver.Solvers
         }
 
        
-
-        
-
-        
-
-
-
         public static void simpleSolver(Tableau tableau)
         {
             if (HasNegativeRhs(tableau)) ;
